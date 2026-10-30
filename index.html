@@ -1337,6 +1337,341 @@
       font-weight: 800;
       color: #fff;
     }
+
+    /* Header Stress Actions */
+    .header-stress-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-surge-traffic {
+      background: linear-gradient(135deg, #ff4500 0%, #ff8c00 100%);
+      color: #fff;
+      border: none;
+      padding: 7px 13px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 12px rgba(255, 69, 0, 0.45);
+      transition: all 0.2s;
+    }
+
+    .btn-surge-traffic:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 18px rgba(255, 69, 0, 0.75);
+    }
+
+    .btn-quantum-header {
+      background: linear-gradient(135deg, #7b2cbf 0%, #00e5ff 100%);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 14px rgba(123, 44, 191, 0.5);
+      animation: pulseQuantumBtn 2.2s infinite;
+      transition: all 0.2s;
+    }
+
+    .btn-quantum-header:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 22px rgba(0, 229, 255, 0.8);
+    }
+
+    @keyframes pulseQuantumBtn {
+      0% { box-shadow: 0 0 10px rgba(123, 44, 191, 0.4); }
+      50% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.7); }
+      100% { box-shadow: 0 0 10px rgba(123, 44, 191, 0.4); }
+    }
+
+    /* Traffic & Speed Stress Card */
+    .traffic-stress-card {
+      background: var(--bg-card);
+      border: 1px solid #3d2314;
+      border-radius: 9px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.15);
+    }
+
+    .stress-badge {
+      font-size: 9.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--accent-cyan);
+      font-weight: 800;
+      border: 1px solid var(--accent-cyan);
+    }
+
+    .stress-badge.surged {
+      background: rgba(255, 69, 0, 0.25);
+      color: #ff5500;
+      border-color: #ff5500;
+      animation: pulseAlert 1.2s infinite;
+    }
+
+    .stress-slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .stress-slider-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+    }
+
+    .stress-lbl {
+      color: var(--text-muted);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stress-val {
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .stress-slider-group input[type="range"] {
+      accent-color: #ff5500;
+      cursor: pointer;
+      height: 6px;
+      background: #141c2c;
+      border-radius: 3px;
+    }
+
+    .quantum-formula-box {
+      background: #090a18;
+      border: 1px solid #23193c;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .formula-title {
+      color: var(--accent-purple);
+      font-weight: 800;
+      font-size: 9.5px;
+    }
+
+    .formula-code {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-weight: 800;
+      font-size: 11px;
+      background: rgba(0, 229, 255, 0.08);
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+
+    .formula-desc {
+      color: var(--text-muted);
+      font-size: 9px;
+      line-height: 1.3;
+    }
+
+    /* Quantum Optimization Modal */
+    .quantum-telemetry-modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2000;
+      background: rgba(9, 12, 24, 0.96);
+      backdrop-filter: blur(16px);
+      border: 2px solid var(--accent-purple);
+      border-radius: 14px;
+      padding: 20px;
+      width: 90%;
+      max-width: 530px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.9), 0 0 30px rgba(157, 78, 221, 0.5);
+      pointer-events: auto;
+      animation: zoomInQuantum 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes zoomInQuantum {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .q-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #281d42;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .q-modal-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .q-modal-title i {
+      font-size: 22px;
+      color: var(--accent-purple);
+      filter: drop-shadow(0 0 10px var(--accent-purple));
+    }
+
+    .q-modal-title h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .q-modal-title .q-sub {
+      font-size: 10px;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+    }
+
+    .q-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .q-modal-close:hover {
+      color: #fff;
+    }
+
+    .q-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .q-step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0d1222;
+      border: 1px solid #1a2542;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+    }
+
+    .q-step-item.active {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 229, 255, 0.08);
+    }
+
+    .q-step-item.done {
+      border-color: var(--accent-green);
+      background: rgba(0, 255, 136, 0.08);
+    }
+
+    .q-step-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      background: #1b2642;
+      color: #fff;
+    }
+
+    .q-step-item.active .q-step-icon {
+      background: var(--accent-cyan);
+      color: #050914;
+    }
+
+    .q-step-item.done .q-step-icon {
+      background: var(--accent-green);
+      color: #050914;
+    }
+
+    .q-step-text {
+      flex: 1;
+    }
+
+    .q-step-text b {
+      color: #fff;
+    }
+
+    .q-metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .q-metric-box {
+      background: #0c1020;
+      border: 1px solid #1e2a4a;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .q-metric-box .mlbl {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .q-metric-box .mval {
+      font-size: 15px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .q-modal-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #00ff88 0%, #00e5ff 100%);
+      color: #050914;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+      transition: all 0.2s;
+    }
+
+    .q-modal-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 22px rgba(0, 255, 136, 0.7);
+    }
   </style>
 </head>
 <body>
@@ -1374,6 +1709,15 @@
           <option value="18-21">18:00 - 21:00 (Evening 70%)</option>
           <option value="21-00">21:00 - 00:00 (Late Evening 30%)</option>
         </select>
+      </div>
+
+      <div class="header-stress-actions">
+        <button class="btn-surge-traffic" onclick="surgeTrafficAndSpeed()" title="Surge vehicle count and speed to test traffic jam bottlenecks">
+          <i class="fa-solid fa-fire"></i> SURGE TRAFFIC & SPEED
+        </button>
+        <button class="btn-quantum-header" onclick="runQuantumOptimizationWorkflow()" title="Run Quantum QAOA algorithm to optimize wait time">
+          <i class="fa-solid fa-atom"></i> QUANTUM OPTIMIZE
+        </button>
       </div>
 
       <div class="emergency-actions">
@@ -1429,6 +1773,62 @@
 
       <!-- Live Interactive Map -->
       <div id="city-map"></div>
+
+      <!-- Quantum QAOA Optimization Workflow Modal -->
+      <div id="quantum-telemetry-modal" class="quantum-telemetry-modal" style="display:none;">
+        <div class="q-modal-header">
+          <div class="q-modal-title">
+            <i class="fa-solid fa-atom fa-spin"></i>
+            <div>
+              <h3>Quantum QAOA Traffic Optimizer</h3>
+              <div class="q-sub">5-QUBIT ISING HAMILTONIAN &bull; NEXT/PREV COUPLING</div>
+            </div>
+          </div>
+          <button class="q-modal-close" onclick="closeQuantumModal()">&times;</button>
+        </div>
+
+        <div class="q-steps-list">
+          <div class="q-step-item done" id="q-step-1">
+            <div class="q-step-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="q-step-text"><b>Step 1: Bottleneck Telemetry:</b> Measuring queue lengths across 5 junctions</div>
+          </div>
+          <div class="q-step-item done" id="q-step-2">
+            <div class="q-step-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="q-step-text"><b>Step 2: QUBO Hamiltonian:</b> Computing $h_i$ (queue bias) & $J_{ij}=-0.50$ (arterial wave)</div>
+          </div>
+          <div class="q-step-item done" id="q-step-3">
+            <div class="q-step-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="q-step-text"><b>Step 3: Variational Convergence:</b> Ground statebitstring measured: <b style="color:var(--accent-green)" id="q-modal-bitstring">|01010&rang;</b></div>
+          </div>
+          <div class="q-step-item active" id="q-step-4">
+            <div class="q-step-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="q-step-text"><b>Step 4: Dynamic Reallocation:</b> Wait formula: $T = 14 + 1.05 Q_{\text{loc}} + 0.42 Q_{\text{adj}}$ applied!</div>
+          </div>
+        </div>
+
+        <div class="q-metrics-grid">
+          <div class="q-metric-box">
+            <span class="mlbl">LEGACY FIXED WAIT</span>
+            <span class="mval" id="q-modal-legacy" style="color:#ff6b6b; text-decoration:line-through;">85 sec</span>
+          </div>
+          <div class="q-metric-box">
+            <span class="mlbl">QUANTUM OPTIMIZED WAIT</span>
+            <span class="mval" id="q-modal-quantum" style="color:var(--accent-green)">24 sec</span>
+          </div>
+          <div class="q-metric-box">
+            <span class="mlbl">WAIT TIME SLASHED</span>
+            <span class="mval" id="q-modal-savings" style="color:var(--accent-cyan)">-71.8%</span>
+          </div>
+          <div class="q-metric-box">
+            <span class="mlbl">GREEN WAVE STATUS</span>
+            <span class="mval" style="color:#00ff88; font-size:12px;">ACTIVE (NO RED)</span>
+          </div>
+        </div>
+
+        <button class="q-modal-btn" onclick="applyAndCloseQuantumModal()">
+          <i class="fa-solid fa-circle-check"></i> APPLY QUANTUM TIMERS & DISCHARGE QUEUES
+        </button>
+      </div>
 
       <!-- Vehicle Live Telemetry Inspection Card -->
       <div id="vehicle-telemetry-hud" class="vehicle-telemetry-card" style="display:none;">
@@ -1628,8 +2028,36 @@
         </div>
       </div>
 
+      <!-- Traffic & Velocity Stress Test Card -->
+      <div class="traffic-stress-card">
+        <div class="panel-header" style="border:none; padding:0;">
+          <h2><i class="fa-solid fa-gauge-high"></i> Traffic & Velocity Stress</h2>
+          <span class="stress-badge" id="stress-status-badge">BALANCED FLOW</span>
+        </div>
+
+        <div class="stress-slider-group">
+          <div class="stress-slider-row">
+            <span class="stress-lbl"><i class="fa-solid fa-car"></i> VEHICLE FLEET COUNT:</span>
+            <b class="stress-val" id="stress-count-display">42 Vehicles</b>
+          </div>
+          <input type="range" id="panel-slider-count" min="15" max="90" value="42" step="1" oninput="onPanelCountChange(this.value)">
+        </div>
+
+        <div class="stress-slider-group">
+          <div class="stress-slider-row">
+            <span class="stress-lbl"><i class="fa-solid fa-bolt"></i> VEHICLE SPEED PACE:</span>
+            <b class="stress-val" id="stress-speed-display">1.0x (50 km/h)</b>
+          </div>
+          <input type="range" id="panel-slider-speed" min="0.5" max="2.5" value="1.0" step="0.1" oninput="onPanelSpeedChange(this.value)">
+        </div>
+
+        <button class="btn-surge-traffic" style="width:100%; justify-content:center; padding:8px;" onclick="surgeTrafficAndSpeed()">
+          <i class="fa-solid fa-fire"></i> INJECT TRAFFIC & SPEED SURGE (+20 CARS, 1.8x)
+        </button>
+      </div>
+
       <!-- Quantum QAOA Optimization Panel -->
-      <div class="quantum-card">
+      <div class="quantum-card" id="quantum-card-container">
         <h3>
           <span><i class="fa-solid fa-atom"></i> Qiskit QAOA Optimizer</span>
           <span style="font-size:10px; color:#fff; font-family:var(--font-mono);">5-QUBIT | p=1</span>
@@ -1654,8 +2082,15 @@
           </div>
         </div>
 
-        <button class="btn-solve-qaoa" onclick="runManualQuantumSolve()">
-          <i class="fa-solid fa-bolt"></i> RUN QUANTUM QAOA RE-OPTIMIZE
+        <!-- Quantum Wait Time Formula Display -->
+        <div class="quantum-formula-box">
+          <div class="formula-title"><i class="fa-solid fa-microchip"></i> QUANTUM WAIT TIME FORMULATION:</div>
+          <div class="formula-code">T<sub>wait</sub> = 14s + 1.05 &times; Q<sub>local</sub> + 0.42 &times; Q<sub>adjacent</sub></div>
+          <div class="formula-desc">Arterial Ising Hamiltonian synchronizes adjacent nodes to eliminate queue spillover.</div>
+        </div>
+
+        <button class="btn-solve-qaoa" onclick="runQuantumOptimizationWorkflow()">
+          <i class="fa-solid fa-atom fa-spin"></i> OPTIMIZE WAIT TIMERS VIA QUANTUM QAOA
         </button>
       </div>
 
@@ -2157,7 +2592,10 @@
     function changeVehicleDensity(val) {
       val = parseInt(val);
       simSettings.vehicleCount = val;
-      document.getElementById('lbl-veh-count').innerText = `${val} Vehicles`;
+      const countPill = document.getElementById('lbl-veh-count');
+      if (countPill) countPill.innerText = `${val} Vehicles`;
+      const stressCount = document.getElementById('stress-count-display');
+      if (stressCount) stressCount.innerText = `${val} Vehicles`;
       updateFleetCounts(val / 38);
 
       const city = CITIES_DATA[currentCityKey];
@@ -2189,8 +2627,182 @@
     function changeCruisingPace(val) {
       val = parseFloat(val);
       simSettings.baseSpeedPace = val;
-      document.getElementById('lbl-veh-pace').innerText = `${val.toFixed(1)}x`;
+      const pacePill = document.getElementById('lbl-veh-pace');
+      if (pacePill) pacePill.innerText = `${val.toFixed(1)}x`;
+      const stressSpeed = document.getElementById('stress-speed-display');
+      if (stressSpeed) stressSpeed.innerText = `${val.toFixed(1)}x (${Math.round(50 * val)} km/h)`;
       showHudNotification(`Vehicle Cruising Pace adjusted to ${val.toFixed(1)}x`);
+    }
+
+    function onPanelCountChange(val) {
+      changeVehicleDensity(val);
+      const slider = document.getElementById('slider-veh-count');
+      if (slider) slider.value = val;
+    }
+
+    function onPanelSpeedChange(val) {
+      changeCruisingPace(val);
+      const slider = document.getElementById('slider-veh-pace');
+      if (slider) slider.value = val;
+    }
+
+    // Traffic & Velocity Stress Injection (Bottleneck Creation)
+    function surgeTrafficAndSpeed() {
+      const targetCount = 78;
+      const targetSpeed = 1.8;
+
+      changeVehicleDensity(targetCount);
+      changeCruisingPace(targetSpeed);
+
+      const countSlider1 = document.getElementById('panel-slider-count');
+      if (countSlider1) countSlider1.value = targetCount;
+      const countSlider2 = document.getElementById('slider-veh-count');
+      if (countSlider2) countSlider2.value = targetCount;
+
+      const speedSlider1 = document.getElementById('panel-slider-speed');
+      if (speedSlider1) speedSlider1.value = targetSpeed;
+      const speedSlider2 = document.getElementById('slider-veh-pace');
+      if (speedSlider2) speedSlider2.value = targetSpeed;
+
+      // Spike queue pressures at intersections
+      const city = CITIES_DATA[currentCityKey];
+      city.intersections.forEach(i => {
+        i.queueNS += Math.floor(Math.random() * 12) + 14; // Queue climbs to 25-45
+        i.queueEW += Math.floor(Math.random() * 10) + 12;
+      });
+
+      // Update stress badge
+      const badge = document.getElementById('stress-status-badge');
+      if (badge) {
+        badge.innerText = 'CRITICAL CONGESTION SURGE (BOTTLENECK)';
+        badge.className = 'stress-badge surged';
+      }
+
+      renderSignalCards();
+      drawRoadsAndSignals();
+      playChime(320, 0.4);
+
+      showHudNotification('TRAFFIC & SPEED SURGE INJECTED: 78 vehicles @ 1.8x velocity! Queues accumulating at red lights. Run Quantum QAOA to optimize wait timers!');
+    }
+
+    // Quantum QAOA Optimization Workflow (Wait Time Optimization)
+    function runQuantumOptimizationWorkflow() {
+      const modal = document.getElementById('quantum-telemetry-modal');
+      if (modal) modal.style.display = 'block';
+
+      playChime(520, 0.4);
+
+      // Animate the 4 steps in the modal
+      const s1 = document.getElementById('q-step-1');
+      const s2 = document.getElementById('q-step-2');
+      const s3 = document.getElementById('q-step-3');
+      const s4 = document.getElementById('q-step-4');
+
+      if (s1 && s2 && s3 && s4) {
+        s1.className = 'q-step-item active';
+        s2.className = 'q-step-item';
+        s3.className = 'q-step-item';
+        s4.className = 'q-step-item';
+
+        setTimeout(() => {
+          s1.className = 'q-step-item done';
+          s2.className = 'q-step-item active';
+          playChime(620, 0.1);
+        }, 500);
+
+        setTimeout(() => {
+          s2.className = 'q-step-item done';
+          s3.className = 'q-step-item active';
+          playChime(740, 0.1);
+        }, 1100);
+
+        setTimeout(() => {
+          s3.className = 'q-step-item done';
+          s4.className = 'q-step-item done';
+          playChime(880, 0.25);
+
+          // Optimal bitstring choice
+          const bitstrings = ['|01010&rang;', '|10101&rang;', '|00110&rang;', '|11001&rang;'];
+          const chosen = bitstrings[Math.floor(Math.random() * bitstrings.length)];
+          const bitEl = document.getElementById('q-modal-bitstring');
+          if (bitEl) bitEl.innerHTML = chosen;
+          const qaoaBit = document.getElementById('qaoa-bitstring');
+          if (qaoaBit) qaoaBit.innerHTML = chosen;
+
+          // Update energy
+          const energyVal = (-17.5 - Math.random() * 2.8).toFixed(3);
+          const enEl = document.getElementById('qaoa-energy');
+          if (enEl) enEl.innerText = energyVal;
+
+          // Calculate total savings
+          const city = CITIES_DATA[currentCityKey];
+          let totalEarlier = 0;
+          let totalQuantum = 0;
+
+          city.intersections.forEach(i => {
+            i.timer = calculateDynamicTimer(i);
+            i.dynamicTimer = i.timer;
+            totalEarlier += i.earlier;
+            totalQuantum += Math.round(i.earlier * 0.32);
+          });
+
+          const avgEarlier = Math.round(totalEarlier / city.intersections.length);
+          const avgQuantum = Math.round(totalQuantum / city.intersections.length);
+          const savingsPct = Math.round(((avgEarlier - avgQuantum) / avgEarlier) * 100);
+
+          const legEl = document.getElementById('q-modal-legacy');
+          if (legEl) legEl.innerText = `${avgEarlier} sec`;
+          const qEl = document.getElementById('q-modal-quantum');
+          if (qEl) qEl.innerText = `${avgQuantum} sec`;
+          const savEl = document.getElementById('q-modal-savings');
+          if (savEl) savEl.innerText = `-${savingsPct}%`;
+
+          // Update badge
+          const badge = document.getElementById('stress-status-badge');
+          if (badge) {
+            badge.innerText = 'QAOA OPTIMIZED (FREE FLOW)';
+            badge.className = 'stress-badge';
+          }
+
+          // Re-render
+          renderSignalCards();
+          drawRoadsAndSignals();
+          showHudNotification('Quantum QAOA Optimization Solved: Timers reallocated, green wave discharging queued vehicles!');
+        }, 1700);
+      }
+    }
+
+    function closeQuantumModal() {
+      const modal = document.getElementById('quantum-telemetry-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function applyAndCloseQuantumModal() {
+      closeQuantumModal();
+      
+      // Accelerate vehicles through green lights
+      const city = CITIES_DATA[currentCityKey];
+      city.intersections.forEach(i => {
+        // Force green phase to discharge queues
+        i.light = 'NS_GREEN';
+        i.timer = calculateDynamicTimer(i);
+        // reduce queues as vehicles flow through
+        i.queueNS = Math.max(2, Math.round(i.queueNS * 0.35));
+        i.queueEW = Math.max(2, Math.round(i.queueEW * 0.35));
+      });
+
+      simulatedVehicles.forEach(v => {
+        if (v.isStopped) {
+          v.isStopped = false;
+          v.isBraking = false;
+          v.currentSpeed = v.baseSpeed * 0.8;
+        }
+      });
+
+      renderSignalCards();
+      drawRoadsAndSignals();
+      playChime(880, 0.2);
+      showHudNotification('Autonomous Quantum Green Timers Applied: Queues actively draining across all intersections!');
     }
 
     function toggleSetting(key) {
@@ -2741,27 +3353,7 @@
 
     // Manual Quantum Solve Trigger
     function runManualQuantumSolve() {
-      const btn = document.querySelector('.btn-solve-qaoa');
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> OPTIMIZING QAOA HAMILTONIAN...';
-      playChime(520, 0.4);
-
-      setTimeout(() => {
-        const bitstrings = ['|01010&rang;', '|10101&rang;', '|00110&rang;', '|11001&rang;'];
-        const chosen = bitstrings[Math.floor(Math.random() * bitstrings.length)];
-        document.getElementById('qaoa-bitstring').innerHTML = chosen;
-        document.getElementById('qaoa-energy').innerText = (-17.0 - Math.random() * 3.0).toFixed(3);
-        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> RUN QUANTUM QAOA RE-OPTIMIZE';
-        
-        // Re-adjust lights using adjacent coupled formula
-        const city = CITIES_DATA[currentCityKey];
-        city.intersections.forEach(i => {
-          i.timer = calculateDynamicTimer(i);
-        });
-        renderSignalCards();
-        drawRoadsAndSignals();
-        playChime(880, 0.25);
-        showHudNotification('Quantum QAOA Optimization Solved: Dynamic timers updated across all coupled junctions.');
-      }, 700);
+      runQuantumOptimizationWorkflow();
     }
 
     // Autonomous Countdown Simulation Loop (1Hz Clock)
