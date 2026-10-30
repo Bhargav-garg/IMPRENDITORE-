@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <!-- Chart.js for Quantum & DL graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Google Maps JavaScript API with Live Traffic & Geometry libraries -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhxsKRb8xexsYYd2lRt7mJebkpYnnTLhs&libraries=geometry"></script>
 
   <style>
     :root {
@@ -520,6 +522,71 @@
       box-shadow: 0 0 20px rgba(255, 30, 60, 0.7);
     }
 
+    .map-layer-selector {
+      pointer-events: auto;
+      background: rgba(13, 19, 34, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 3px;
+      display: flex;
+      gap: 4px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.5);
+    }
+
+    .layer-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .layer-btn:hover {
+      color: #fff;
+      background: rgba(0, 229, 255, 0.15);
+    }
+
+    .layer-btn.active {
+      background: var(--accent-cyan);
+      color: #050914;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+    }
+
+    .veh-body {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 6px currentColor);
+      transition: transform 0.08s linear;
+    }
+
+    .siren-beacon {
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: strobeSiren 0.25s infinite alternate;
+    }
+
+    @keyframes strobeSiren {
+      0% { background: #ff0033; box-shadow: 0 0 14px #ff0033; }
+      100% { background: #0088ff; box-shadow: 0 0 14px #0088ff; }
+    }
+
+
     /* Right Sidebar: Deep Learning & Quantum Computing */
     .panel-right {
       background: var(--bg-panel);
@@ -826,7 +893,13 @@
         <div class="map-pill-bar">
           <div class="map-pill-item"><i class="fa-solid fa-location-dot" style="color:var(--accent-cyan)"></i> CITY: <b id="active-city-name">Bhopal</b></div>
           <div class="map-pill-item"><i class="fa-solid fa-car" style="color:var(--accent-green)"></i> ACTIVE VEHICLES: <b id="map-vehicle-count">64</b></div>
-          <div class="map-pill-item"><i class="fa-solid fa-cloud" style="color:var(--accent-amber)"></i> GOOGLE MAPS API: <b>CALIBRATED MATRIX</b></div>
+          <div class="map-pill-item"><i class="fa-brands fa-google" style="color:#4285F4"></i> GOOGLE MAPS API: <b style="color:var(--accent-green)">CONNECTED (LIVE TRAFFIC)</b></div>
+        </div>
+
+        <div class="map-layer-selector">
+          <button class="layer-btn active" id="btn-layer-dark" onclick="switchMapLayer('dark')"><i class="fa-solid fa-moon"></i> Cyber Dark</button>
+          <button class="layer-btn" id="btn-layer-traffic" onclick="switchMapLayer('traffic')"><i class="fa-solid fa-traffic-light" style="color:#00ff88"></i> Google Traffic</button>
+          <button class="layer-btn" id="btn-layer-sat" onclick="switchMapLayer('satellite')"><i class="fa-solid fa-satellite" style="color:#00e5ff"></i> Google Satellite</button>
         </div>
 
         <div id="emergency-alert-banner" class="emergency-hud-alert">
@@ -963,7 +1036,7 @@
 
   <script>
     // -------------------------------------------------------------
-    // DATA: 5 Indian Cities with Real Intersections & Baselines
+    // DATA: 5 Indian Cities with Real Intersections, Connections & Baselines
     // -------------------------------------------------------------
     const CITIES_DATA = {
       bhopal: {
@@ -971,11 +1044,11 @@
         center: [23.2380, 77.4260],
         zoom: 13,
         intersections: [
-          { id: 0, name: 'DB Mall Chowk', lat: 23.2332, lng: 77.4341, earlier: 75, queueNS: 18, queueEW: 9, light: 'NS_GREEN', timer: 24, greenMax: 45 },
-          { id: 1, name: 'New Market Square', lat: 23.2599, lng: 77.4126, earlier: 70, queueNS: 8, queueEW: 15, light: 'EW_GREEN', timer: 19, greenMax: 40 },
-          { id: 2, name: 'Habibganj Junction', lat: 23.2295, lng: 77.4382, earlier: 65, queueNS: 12, queueEW: 7, light: 'NS_GREEN', timer: 28, greenMax: 35 },
-          { id: 3, name: 'MP Nagar Zone-I', lat: 23.2260, lng: 77.4340, earlier: 80, queueNS: 10, queueEW: 22, light: 'EW_GREEN', timer: 14, greenMax: 50 },
-          { id: 4, name: 'ISBT Bhopal', lat: 23.2855, lng: 77.4122, earlier: 60, queueNS: 6, queueEW: 8, light: 'NS_GREEN', timer: 32, greenMax: 35 }
+          { id: 0, name: 'DB Mall Chowk', lat: 23.2332, lng: 77.4341, earlier: 75, queueNS: 18, queueEW: 9, light: 'NS_GREEN', timer: 24, connections: [1, 2, 3], dynamicTimer: 24 },
+          { id: 1, name: 'New Market Square', lat: 23.2599, lng: 77.4126, earlier: 70, queueNS: 8, queueEW: 15, light: 'EW_GREEN', timer: 19, connections: [0, 3, 4], dynamicTimer: 19 },
+          { id: 2, name: 'Habibganj Junction', lat: 23.2295, lng: 77.4382, earlier: 65, queueNS: 12, queueEW: 7, light: 'NS_GREEN', timer: 28, connections: [0, 3], dynamicTimer: 28 },
+          { id: 3, name: 'MP Nagar Zone-I', lat: 23.2260, lng: 77.4340, earlier: 80, queueNS: 10, queueEW: 22, light: 'EW_GREEN', timer: 14, connections: [0, 1, 2], dynamicTimer: 14 },
+          { id: 4, name: 'ISBT Bhopal', lat: 23.2855, lng: 77.4122, earlier: 60, queueNS: 6, queueEW: 8, light: 'NS_GREEN', timer: 32, connections: [1], dynamicTimer: 32 }
         ]
       },
       gwalior: {
@@ -983,11 +1056,11 @@
         center: [26.2120, 78.1780],
         zoom: 13,
         intersections: [
-          { id: 0, name: 'Phool Bagh Square', lat: 26.2183, lng: 78.1828, earlier: 68, queueNS: 16, queueEW: 8, light: 'NS_GREEN', timer: 22, greenMax: 40 },
-          { id: 1, name: 'Maharaj Bada', lat: 26.2124, lng: 78.1779, earlier: 85, queueNS: 9, queueEW: 25, light: 'EW_GREEN', timer: 18, greenMax: 55 },
-          { id: 2, name: 'Jayendraganj', lat: 26.2052, lng: 78.1706, earlier: 65, queueNS: 14, queueEW: 6, light: 'NS_GREEN', timer: 25, greenMax: 35 },
-          { id: 3, name: 'City Center Mall', lat: 26.2098, lng: 78.1858, earlier: 72, queueNS: 11, queueEW: 14, light: 'EW_GREEN', timer: 16, greenMax: 45 },
-          { id: 4, name: 'Bada Chowk', lat: 26.2152, lng: 78.1752, earlier: 60, queueNS: 7, queueEW: 5, light: 'NS_GREEN', timer: 30, greenMax: 35 }
+          { id: 0, name: 'Phool Bagh Square', lat: 26.2183, lng: 78.1828, earlier: 68, queueNS: 16, queueEW: 8, light: 'NS_GREEN', timer: 22, connections: [1, 3, 4], dynamicTimer: 22 },
+          { id: 1, name: 'Maharaj Bada', lat: 26.2124, lng: 78.1779, earlier: 85, queueNS: 9, queueEW: 25, light: 'EW_GREEN', timer: 18, connections: [0, 2, 4], dynamicTimer: 18 },
+          { id: 2, name: 'Jayendraganj', lat: 26.2052, lng: 78.1706, earlier: 65, queueNS: 14, queueEW: 6, light: 'NS_GREEN', timer: 25, connections: [1, 3], dynamicTimer: 25 },
+          { id: 3, name: 'City Center Mall', lat: 26.2098, lng: 78.1858, earlier: 72, queueNS: 11, queueEW: 14, light: 'EW_GREEN', timer: 16, connections: [0, 2], dynamicTimer: 16 },
+          { id: 4, name: 'Bada Chowk', lat: 26.2152, lng: 78.1752, earlier: 60, queueNS: 7, queueEW: 5, light: 'NS_GREEN', timer: 30, connections: [0, 1], dynamicTimer: 30 }
         ]
       },
       newdelhi: {
@@ -995,11 +1068,11 @@
         center: [28.6180, 77.2150],
         zoom: 13,
         intersections: [
-          { id: 0, name: 'ITO Junction', lat: 28.6285, lng: 77.2413, earlier: 90, queueNS: 32, queueEW: 18, light: 'NS_GREEN', timer: 35, greenMax: 65 },
-          { id: 1, name: 'Connaught Place', lat: 28.6315, lng: 77.2167, earlier: 85, queueNS: 14, queueEW: 28, light: 'EW_GREEN', timer: 21, greenMax: 55 },
-          { id: 2, name: 'AIIMS Crossing', lat: 28.5672, lng: 77.2100, earlier: 95, queueNS: 26, queueEW: 15, light: 'NS_GREEN', timer: 30, greenMax: 60 },
-          { id: 3, name: 'Karol Bagh Square', lat: 28.6519, lng: 77.1905, earlier: 80, queueNS: 19, queueEW: 21, light: 'EW_GREEN', timer: 17, greenMax: 50 },
-          { id: 4, name: 'Rajiv Chowk', lat: 28.6328, lng: 77.2197, earlier: 75, queueNS: 15, queueEW: 12, light: 'NS_GREEN', timer: 28, greenMax: 45 }
+          { id: 0, name: 'ITO Junction', lat: 28.6285, lng: 77.2413, earlier: 90, queueNS: 32, queueEW: 18, light: 'NS_GREEN', timer: 35, connections: [1, 4], dynamicTimer: 35 },
+          { id: 1, name: 'Connaught Place', lat: 28.6315, lng: 77.2167, earlier: 85, queueNS: 14, queueEW: 28, light: 'EW_GREEN', timer: 21, connections: [0, 3, 4], dynamicTimer: 21 },
+          { id: 2, name: 'AIIMS Crossing', lat: 28.5672, lng: 77.2100, earlier: 95, queueNS: 26, queueEW: 15, light: 'NS_GREEN', timer: 30, connections: [0, 3], dynamicTimer: 30 },
+          { id: 3, name: 'Karol Bagh Square', lat: 28.6519, lng: 77.1905, earlier: 80, queueNS: 19, queueEW: 21, light: 'EW_GREEN', timer: 17, connections: [1, 2], dynamicTimer: 17 },
+          { id: 4, name: 'Rajiv Chowk', lat: 28.6328, lng: 77.2197, earlier: 75, queueNS: 15, queueEW: 12, light: 'NS_GREEN', timer: 28, connections: [0, 1], dynamicTimer: 28 }
         ]
       },
       bangalore: {
@@ -1007,11 +1080,11 @@
         center: [12.9750, 77.6200],
         zoom: 12,
         intersections: [
-          { id: 0, name: 'Silk Board Junction', lat: 12.9172, lng: 77.6227, earlier: 105, queueNS: 42, queueEW: 24, light: 'NS_GREEN', timer: 40, greenMax: 70 },
-          { id: 1, name: 'KR Puram Junction', lat: 13.0012, lng: 77.6966, earlier: 95, queueNS: 18, queueEW: 35, light: 'EW_GREEN', timer: 26, greenMax: 60 },
-          { id: 2, name: 'Hebbal Flyover', lat: 13.0358, lng: 77.5970, earlier: 85, queueNS: 22, queueEW: 16, light: 'NS_GREEN', timer: 32, greenMax: 50 },
-          { id: 3, name: 'Koramangala Signal', lat: 12.9352, lng: 77.6245, earlier: 80, queueNS: 15, queueEW: 24, light: 'EW_GREEN', timer: 18, greenMax: 45 },
-          { id: 4, name: 'MG Road Junction', lat: 12.9756, lng: 77.6068, earlier: 75, queueNS: 14, queueEW: 11, light: 'NS_GREEN', timer: 27, greenMax: 40 }
+          { id: 0, name: 'Silk Board Junction', lat: 12.9172, lng: 77.6227, earlier: 105, queueNS: 42, queueEW: 24, light: 'NS_GREEN', timer: 40, connections: [1, 3], dynamicTimer: 40 },
+          { id: 1, name: 'KR Puram Junction', lat: 13.0012, lng: 77.6966, earlier: 95, queueNS: 18, queueEW: 35, light: 'EW_GREEN', timer: 26, connections: [0, 2], dynamicTimer: 26 },
+          { id: 2, name: 'Hebbal Flyover', lat: 13.0358, lng: 77.5970, earlier: 85, queueNS: 22, queueEW: 16, light: 'NS_GREEN', timer: 32, connections: [1, 4], dynamicTimer: 32 },
+          { id: 3, name: 'Koramangala Signal', lat: 12.9352, lng: 77.6245, earlier: 80, queueNS: 15, queueEW: 24, light: 'EW_GREEN', timer: 18, connections: [0, 4], dynamicTimer: 18 },
+          { id: 4, name: 'MG Road Junction', lat: 12.9756, lng: 77.6068, earlier: 75, queueNS: 14, queueEW: 11, light: 'NS_GREEN', timer: 27, connections: [2, 3], dynamicTimer: 27 }
         ]
       },
       chandigarh: {
@@ -1019,11 +1092,11 @@
         center: [30.7380, 76.7750],
         zoom: 13,
         intersections: [
-          { id: 0, name: 'Sector 17 Plaza', lat: 30.7414, lng: 76.7838, earlier: 65, queueNS: 14, queueEW: 7, light: 'NS_GREEN', timer: 24, greenMax: 35 },
-          { id: 1, name: 'ISBT-43 Junction', lat: 30.7268, lng: 76.7598, earlier: 70, queueNS: 8, queueEW: 16, light: 'EW_GREEN', timer: 19, greenMax: 40 },
-          { id: 2, name: 'Tribune Chowk', lat: 30.7286, lng: 76.7881, earlier: 75, queueNS: 18, queueEW: 11, light: 'NS_GREEN', timer: 28, greenMax: 45 },
-          { id: 3, name: 'Sector 22 Market', lat: 30.7330, lng: 76.7773, earlier: 60, queueNS: 9, queueEW: 12, light: 'EW_GREEN', timer: 15, greenMax: 35 },
-          { id: 4, name: 'PGI Roundabout', lat: 30.7640, lng: 76.7759, earlier: 70, queueNS: 16, queueEW: 9, light: 'NS_GREEN', timer: 31, greenMax: 40 }
+          { id: 0, name: 'Sector 17 Plaza', lat: 30.7414, lng: 76.7838, earlier: 65, queueNS: 14, queueEW: 7, light: 'NS_GREEN', timer: 24, connections: [1, 3], dynamicTimer: 24 },
+          { id: 1, name: 'ISBT-43 Junction', lat: 30.7268, lng: 76.7598, earlier: 70, queueNS: 8, queueEW: 16, light: 'EW_GREEN', timer: 19, connections: [0, 2], dynamicTimer: 19 },
+          { id: 2, name: 'Tribune Chowk', lat: 30.7286, lng: 76.7881, earlier: 75, queueNS: 18, queueEW: 11, light: 'NS_GREEN', timer: 28, connections: [1, 3], dynamicTimer: 28 },
+          { id: 3, name: 'Sector 22 Market', lat: 30.7330, lng: 76.7773, earlier: 60, queueNS: 9, queueEW: 12, light: 'EW_GREEN', timer: 15, connections: [0, 2, 4], dynamicTimer: 15 },
+          { id: 4, name: 'PGI Roundabout', lat: 30.7640, lng: 76.7759, earlier: 70, queueNS: 16, queueEW: 9, light: 'NS_GREEN', timer: 31, connections: [3], dynamicTimer: 31 }
         ]
       }
     };
@@ -1032,9 +1105,28 @@
     let map = null;
     let markersLayer = null;
     let roadsLayer = null;
+    let vehiclesLayer = null;
     let emergencyPolyline = null;
     let emergencyMode = false;
     let emergencyType = 'ambulance';
+
+    // Google Maps & Map Layers
+    const MAP_LAYERS = {
+      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }),
+      traffic: L.tileLayer('https://mt1.google.com/vt/lyrs=m@221097413,traffic|seconds_into_week:-1&style=3&x={x}&y={y}&z={z}', { maxZoom: 20 }),
+      satellite: L.tileLayer('https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20 })
+    };
+    let currentTileLayer = MAP_LAYERS.dark;
+
+    function switchMapLayer(layerName) {
+      if (currentTileLayer && map) map.removeLayer(currentTileLayer);
+      currentTileLayer = MAP_LAYERS[layerName] || MAP_LAYERS.dark;
+      currentTileLayer.addTo(map);
+
+      document.querySelectorAll('.layer-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-layer-${layerName}`);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
 
     // -------------------------------------------------------------
     // MAP INITIALIZATION
@@ -1046,16 +1138,36 @@
         attributionControl: false
       }).setView(city.center, city.zoom);
 
-      // CartoDB Dark Matter Tiles (High contrast, clearly visible roads)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        subdomains: 'abcd'
-      }).addTo(map);
+      currentTileLayer.addTo(map);
 
       roadsLayer = L.layerGroup().addTo(map);
       markersLayer = L.layerGroup().addTo(map);
+      vehiclesLayer = L.layerGroup().addTo(map);
 
       drawRoadsAndSignals();
+      initVehicles();
+    }
+
+    // Calculate Dynamic Wait Timer based on Current & Adjacent Lights
+    function calculateDynamicTimer(inter) {
+      const city = CITIES_DATA[currentCityKey];
+      const localQ = inter.queueNS + inter.queueEW;
+      
+      // Calculate adjacent lights total queue pressure
+      let adjacentQ = 0;
+      if (inter.connections) {
+        inter.connections.forEach(adjId => {
+          const adj = city.intersections.find(i => i.id === adjId);
+          if (adj) {
+            adjacentQ += (adj.queueNS + adj.queueEW);
+          }
+        });
+      }
+
+      // Quantum QAOA Wave Coupling Formula:
+      // timer = base (14s) + local_weight(1.1) + adjacent_coupling(0.45)
+      const calculated = Math.round(14 + (localQ * 1.05) + (adjacentQ * 0.42));
+      return Math.min(68, Math.max(12, calculated));
     }
 
     // Draw connecting roads and signal markers
@@ -1073,12 +1185,32 @@
             [inters[i].lat, inters[i].lng],
             [inters[j].lat, inters[j].lng]
           ];
-          // Outer road glow line
+          
+          // 1. Asphalt highway base
           L.polyline(latlngs, {
-            color: '#00e5ff',
+            color: '#121829',
+            weight: 12,
+            opacity: 0.95
+          }).addTo(roadsLayer);
+
+          // 2. Road curb outline
+          L.polyline(latlngs, {
+            color: '#24324f',
+            weight: 14,
+            opacity: 0.4
+          }).addTo(roadsLayer);
+
+          // 3. Google live traffic colored flow lane (green / yellow / red based on queue)
+          const totalQ = (inters[i].queueNS + inters[j].queueNS);
+          let trafficFlowColor = '#00ff88'; // Free flow
+          if (totalQ > 35) trafficFlowColor = '#ff334b'; // Heavy
+          else if (totalQ > 20) trafficFlowColor = '#ffb703'; // Moderate
+
+          L.polyline(latlngs, {
+            color: trafficFlowColor,
             weight: 3,
-            opacity: 0.35,
-            dashArray: '8, 8'
+            opacity: 0.85,
+            dashArray: '8, 12'
           }).addTo(roadsLayer);
         }
       }
@@ -1087,6 +1219,7 @@
       inters.forEach(inter => {
         const isNSGreen = inter.light === 'NS_GREEN';
         const colorClass = emergencyMode ? 'red' : (isNSGreen ? 'green' : 'red');
+        const totalQueue = inter.queueNS + inter.queueEW;
 
         const customIcon = L.divIcon({
           className: 'leaflet-signal-marker',
@@ -1094,18 +1227,21 @@
             <div class="map-signal-pin" onclick="focusIntersection(${inter.id})">
               <div class="pin-dot ${colorClass}"></div>
               <div class="pin-timer">${inter.timer}s</div>
+              <span style="font-size:9px; color:#ffb703; font-weight:800; margin-left:3px;">Q:${totalQueue}</span>
             </div>
           `,
-          iconSize: [60, 30]
+          iconSize: [80, 30]
         });
 
         const marker = L.marker([inter.lat, inter.lng], { icon: customIcon }).addTo(markersLayer);
         marker.bindPopup(`
-          <div style="background:#0d1322; color:#fff; padding:6px; border-radius:6px; font-size:12px;">
-            <b>${inter.name}</b><br>
-            Current Phase: <b style="color:${isNSGreen ? '#00ff88' : '#00e5ff'}">${inter.light}</b><br>
+          <div style="background:#0d1322; color:#fff; padding:8px; border-radius:6px; font-size:12px; line-height:1.5;">
+            <b style="color:var(--accent-cyan); font-size:13px;">${inter.name}</b><br>
+            Signal State: <b style="color:${isNSGreen ? '#00ff88' : '#00e5ff'}">${inter.light}</b><br>
             Autonomous Countdown: <b>${inter.timer}s</b><br>
-            Earlier Wait: <span style="text-decoration:line-through; color:#ff6b6b">${inter.earlier}s</span><br>
+            Local Queue: <b>${totalQueue} vehicles</b> (NS: ${inter.queueNS}, EW: ${inter.queueEW})<br>
+            Adjacent Coupled Lights: <b>${inter.connections.length} nodes connected</b><br>
+            Earlier Fixed Wait: <span style="text-decoration:line-through; color:#ff6b6b">${inter.earlier}s</span><br>
             Quantum Wait: <b style="color:#00ff88">${Math.round(inter.earlier * 0.32)}s (-68%)</b>
           </div>
         `);
@@ -1123,6 +1259,13 @@
         const quantumWait = Math.round(inter.earlier * 0.32);
         const savingsSec = inter.earlier - quantumWait;
         const reductionPct = Math.round((savingsSec / inter.earlier) * 100);
+        const totalQueue = inter.queueNS + inter.queueEW;
+
+        // Names of adjacent intersections
+        const adjNames = inter.connections.map(id => {
+          const adj = city.intersections.find(i => i.id === id);
+          return adj ? `${adj.name.split(' ')[0]} (Q:${adj.queueNS + adj.queueEW})` : `J${id}`;
+        }).join(', ');
 
         const card = document.createElement('div');
         card.className = `signal-card ${emergencyMode ? 'emergency-active' : ''}`;
@@ -1136,8 +1279,8 @@
             </span>
           </div>
 
+          <!-- Dual Traffic Light Fixtures & Countdown -->
           <div class="signal-visualizer-row">
-            <!-- North-South Light -->
             <div class="traffic-fixture">
               <span class="fixture-label">NORTH - SOUTH</span>
               <div class="fixture-housing">
@@ -1145,15 +1288,17 @@
                 <div class="light-bulb amber"></div>
                 <div class="light-bulb green ${isNSGreen && !emergencyMode ? 'on' : ''}"></div>
               </div>
+              <span style="font-size:9px; color:${isNSGreen ? '#00ff88' : '#ff334b'}; font-weight:800;">
+                ${isNSGreen ? 'GO (MOVING)' : `STOP (Q: ${inter.queueNS})`}
+              </span>
             </div>
 
-            <!-- Autonomous Digital Timer -->
             <div class="signal-countdown-box">
               <span class="timer-val" style="color:${emergencyMode ? '#ff334b' : (isNSGreen ? '#00ff88' : '#00e5ff')}">${inter.timer}s</span>
               <span class="timer-lbl">WAIT TIMER</span>
+              <span style="font-size:9px; color:#ffb703; font-weight:700; margin-top:2px;">TOTAL Q: ${totalQueue}</span>
             </div>
 
-            <!-- East-West Light -->
             <div class="traffic-fixture">
               <span class="fixture-label">EAST - WEST</span>
               <div class="fixture-housing">
@@ -1161,6 +1306,17 @@
                 <div class="light-bulb amber"></div>
                 <div class="light-bulb green ${!isNSGreen && !emergencyMode ? 'on' : ''}"></div>
               </div>
+              <span style="font-size:9px; color:${!isNSGreen ? '#00ff88' : '#ff334b'}; font-weight:800;">
+                ${!isNSGreen ? 'GO (MOVING)' : `STOP (Q: ${inter.queueEW})`}
+              </span>
+            </div>
+          </div>
+
+          <!-- Adjacent Lights Coupling Telemetry -->
+          <div style="background:#080d1a; border:1px solid #1c2844; border-radius:6px; padding:6px 8px; font-size:10px; line-height:1.4;">
+            <div style="color:var(--accent-cyan); font-weight:700;"><i class="fa-solid fa-network-wired"></i> ADJACENT LIGHTS: <b>${adjNames}</b></div>
+            <div style="color:var(--text-muted); font-size:9.5px; margin-top:2px;">
+              Coupled Pressure: <b style="color:#fff">${totalQueue} veh</b> &bull; Calculated Next Phase: <b style="color:var(--accent-green)">${inter.dynamicTimer}s</b>
             </div>
           </div>
 
@@ -1197,7 +1353,7 @@
 
       drawRoadsAndSignals();
       renderSignalCards();
-      updateFleetCounts();
+      initVehicles();
     }
 
     // Focus on an intersection
@@ -1229,11 +1385,13 @@
         dashArray: '10, 10'
       }).addTo(map);
 
-      // Force all signals to ALL-RED except green wave path
+      // Add emergency vehicle immediately onto route
+      injectEmergencyVehicleOnMap(type);
+
       renderSignalCards();
       drawRoadsAndSignals();
 
-      // Auto-clear emergency after 12 seconds
+      // Auto-clear emergency after 14 seconds
       setTimeout(() => {
         emergencyMode = false;
         document.getElementById('emergency-alert-banner').style.display = 'none';
@@ -1241,7 +1399,43 @@
         if (emergencyPolyline) map.removeLayer(emergencyPolyline);
         renderSignalCards();
         drawRoadsAndSignals();
-      }, 12000);
+      }, 14000);
+    }
+
+    function injectEmergencyVehicleOnMap(type) {
+      const city = CITIES_DATA[currentCityKey];
+      const inters = city.intersections;
+      const cfg = VEHICLE_CONFIGS[type] || VEHICLE_CONFIGS.ambulance;
+
+      const vIcon = L.divIcon({
+        className: 'moving-veh-marker',
+        html: `
+          <div class="veh-body" style="color:${cfg.color}; font-size:24px; filter:drop-shadow(0 0 10px #ff0000);">
+            <i class="fa-solid ${cfg.icon}"></i>
+            <div class="siren-beacon"></div>
+          </div>
+        `,
+        iconSize: [28, 28]
+      });
+
+      const start = inters[0];
+      const end = inters[1];
+      const marker = L.marker([start.lat, start.lng], { icon: vIcon }).addTo(vehiclesLayer);
+
+      simulatedVehicles.unshift({
+        id: 'emergency_active',
+        type: type,
+        from: start,
+        to: end,
+        progress: 0.0,
+        baseSpeed: 0.018,
+        currentSpeed: 0.018,
+        maxSpeedKmh: 85,
+        speedKmh: 85,
+        isStopped: false,
+        marker: marker,
+        isEmergency: true
+      });
     }
 
     // Change 3-Hour Time Slot
@@ -1265,29 +1459,27 @@
     }
 
     // -------------------------------------------------------------
-    // REAL-TIME MOVING VEHICLES SIMULATION (Cars, Bikes, Trucks, Buses)
+    // REAL-TIME VEHICLES & QUEUE PHYSICS (Cars, Bikes, Trucks, Buses)
     // -------------------------------------------------------------
-    let vehiclesLayer = null;
     let simulatedVehicles = [];
     const VEHICLE_CONFIGS = {
-      car:   { icon: 'fa-car',         color: '#3498db', speed: 0.006,  size: 16, label: 'Car' },
-      bike:  { icon: 'fa-motorcycle',  color: '#2ecc71', speed: 0.009,  size: 14, label: 'Bike' },
-      truck: { icon: 'fa-truck',       color: '#e74c3c', speed: 0.0035, size: 20, label: 'Truck' },
-      bus:   { icon: 'fa-bus',         color: '#e67e22', speed: 0.0042, size: 19, label: 'Bus' },
-      auto:  { icon: 'fa-taxi',        color: '#f1c40f', speed: 0.0055, size: 15, label: 'Auto' },
-      ambulance: { icon: 'fa-truck-medical', color: '#ff0033', speed: 0.015, size: 22, label: 'Ambulance' }
+      car:   { icon: 'fa-car',         color: '#3498db', speed: 0.0055, maxKmh: 50, size: 16, label: 'Car' },
+      bike:  { icon: 'fa-motorcycle',  color: '#2ecc71', speed: 0.0085, maxKmh: 45, size: 14, label: 'Bike' },
+      truck: { icon: 'fa-truck',       color: '#e74c3c', speed: 0.0032, maxKmh: 35, size: 20, label: 'Truck' },
+      bus:   { icon: 'fa-bus',         color: '#e67e22', speed: 0.0038, maxKmh: 40, size: 19, label: 'Bus' },
+      auto:  { icon: 'fa-taxi',        color: '#f1c40f', speed: 0.0050, maxKmh: 42, size: 15, label: 'Auto' },
+      ambulance: { icon: 'fa-truck-medical', color: '#ff0033', speed: 0.015, maxKmh: 85, size: 24, label: 'Ambulance' },
+      firetruck: { icon: 'fa-fire-extinguisher', color: '#ff5500', speed: 0.014, maxKmh: 80, size: 24, label: 'Fire Truck' }
     };
 
     function initVehicles() {
-      if (!vehiclesLayer) {
-        vehiclesLayer = L.layerGroup().addTo(map);
-      }
+      if (!vehiclesLayer) return;
       vehiclesLayer.clearLayers();
       simulatedVehicles = [];
 
       const city = CITIES_DATA[currentCityKey];
       const inters = city.intersections;
-      const count = 35; // 35 active vehicles moving continuously on tracks
+      const count = 38; // 38 active vehicles moving on tracks
 
       const types = ['car', 'car', 'car', 'bike', 'bike', 'truck', 'bus', 'auto'];
 
@@ -1304,8 +1496,12 @@
 
         const vIcon = L.divIcon({
           className: 'moving-veh-marker',
-          html: `<div style="color:${cfg.color}; font-size:${cfg.size}px; filter:drop-shadow(0 0 5px ${cfg.color}); transition:transform 0.1s;"><i class="fa-solid ${cfg.icon}"></i></div>`,
-          iconSize: [cfg.size, cfg.size]
+          html: `
+            <div class="veh-body" style="color:${cfg.color}; font-size:${cfg.size}px;">
+              <i class="fa-solid ${cfg.icon}"></i>
+            </div>
+          `,
+          iconSize: [cfg.size + 4, cfg.size + 4]
         });
 
         const from = inters[fromIdx];
@@ -1321,15 +1517,19 @@
           from: from,
           to: to,
           progress: progress,
-          baseSpeed: cfg.speed * (0.8 + Math.random() * 0.4),
+          baseSpeed: cfg.speed * (0.85 + Math.random() * 0.3),
           currentSpeed: cfg.speed,
+          maxSpeedKmh: cfg.maxKmh,
+          speedKmh: cfg.maxKmh,
+          isStopped: false,
+          queueIndex: Math.floor(Math.random() * 3),
           marker: marker,
           isEmergency: false
         });
       }
     }
 
-    // High performance 60FPS vehicle movement engine
+    // High performance 60FPS vehicle movement & stopping engine
     let lastAnimTime = performance.now();
     function animateVehicles(time) {
       const dt = Math.min(0.1, (time - lastAnimTime) / 1000.0);
@@ -1338,23 +1538,51 @@
       const city = CITIES_DATA[currentCityKey];
       const inters = city.intersections;
 
+      let movingCount = 0;
+      let queuedCount = 0;
+      let totalSpeed = 0;
+
+      // Track queues at each intersection dynamically
+      const queueCounters = {};
+      inters.forEach(i => { queueCounters[i.id] = { NS: 0, EW: 0 }; });
+
       simulatedVehicles.forEach(v => {
-        // Check signal ahead at destination intersection
         const toInter = v.to;
         const isNS = Math.abs(toInter.lat - v.from.lat) > Math.abs(toInter.lng - v.from.lng);
-        const signalGreen = isNS ? (toInter.light === 'NS_GREEN') : (toInter.light === 'EW_GREEN');
+        const signalGreen = emergencyMode ? (v.isEmergency) : (isNS ? (toInter.light === 'NS_GREEN') : (toInter.light === 'EW_GREEN'));
 
-        // Decelerate if close to intersection and light is red (unless emergency)
-        if (!v.isEmergency && !signalGreen && v.progress > 0.82 && v.progress < 0.95) {
-          v.currentSpeed = Math.max(0, v.currentSpeed - v.baseSpeed * 4.0 * dt);
+        // Stop line position staggered by queue index (creates realistic vehicle queue line behind red light!)
+        const stopProgress = 0.84 - (v.queueIndex * 0.038);
+
+        if (!signalGreen && !v.isEmergency && v.progress >= (stopProgress - 0.06) && v.progress < 0.98) {
+          // VEHICLE STOPS AT RED LIGHT: Decelerate smoothly to 0 km/h!
+          v.currentSpeed = Math.max(0, v.currentSpeed - v.baseSpeed * 4.5 * dt);
+          if (v.progress > stopProgress) {
+            v.progress = stopProgress;
+          }
+          v.isStopped = (v.currentSpeed <= 0.0002);
+          if (v.isStopped) {
+            v.currentSpeed = 0;
+            v.speedKmh = 0;
+            queuedCount++;
+
+            // Increment queue at destination light
+            if (isNS) queueCounters[toInter.id].NS += 1;
+            else queueCounters[toInter.id].EW += 1;
+          }
         } else {
-          v.currentSpeed = Math.min(v.baseSpeed, v.currentSpeed + v.baseSpeed * 3.0 * dt);
+          // VEHICLE ACCELERATES ON GREEN: Accelerate up to speed limit!
+          v.isStopped = false;
+          v.currentSpeed = Math.min(v.baseSpeed, v.currentSpeed + v.baseSpeed * 3.5 * dt);
+          v.progress += v.currentSpeed * (dt * 6.0);
+          v.speedKmh = Math.round((v.currentSpeed / v.baseSpeed) * v.maxSpeedKmh);
+          movingCount++;
         }
 
-        v.progress += v.currentSpeed * (dt * 6.0);
+        totalSpeed += v.speedKmh;
 
+        // Transition past junction
         if (v.progress >= 1.0) {
-          // Reached intersection, pick next target
           v.progress = 0.0;
           v.from = v.to;
           let nextIdx = Math.floor(Math.random() * inters.length);
@@ -1362,13 +1590,35 @@
             nextIdx = Math.floor(Math.random() * inters.length);
           }
           v.to = inters[nextIdx];
+          v.queueIndex = Math.floor(Math.random() * 3);
         }
 
         // Interpolate position
         const lat = v.from.lat + (v.to.lat - v.from.lat) * v.progress;
         const lng = v.from.lng + (v.to.lng - v.from.lng) * v.progress;
         v.marker.setLatLng([lat, lng]);
+
+        // Directional Heading Angle (Degrees)
+        const dLat = v.to.lat - v.from.lat;
+        const dLng = v.to.lng - v.from.lng;
+        const angle = (Math.atan2(dLng, dLat) * 180 / Math.PI) - 90;
+
+        const el = v.marker.getElement();
+        if (el) {
+          const body = el.querySelector('.veh-body');
+          if (body) {
+            body.style.transform = `rotate(${angle}deg)`;
+            body.style.opacity = v.isStopped ? '0.7' : '1.0';
+          }
+        }
       });
+
+      // Update HUD metrics
+      const avgSpeed = simulatedVehicles.length ? Math.round(totalSpeed / simulatedVehicles.length) : 38;
+      const speedHud = document.getElementById('map-vehicle-count');
+      if (speedHud) {
+        speedHud.innerHTML = `<span style="color:#00ff88">${movingCount} MOVING</span> &bull; <span style="color:#ff334b">${queuedCount} STOPPED</span> &bull; <span style="color:#00e5ff">${avgSpeed} km/h AVG</span>`;
+      }
 
       requestAnimationFrame(animateVehicles);
     }
@@ -1381,14 +1631,12 @@
       const baseTrucks = Math.round(4 * mult);
       const baseBikes = Math.round(12 * mult);
       const baseAutos = Math.round(7 * mult);
-      const total = baseCars + baseBuses + baseTrucks + baseBikes + baseAutos;
 
       document.getElementById('count-car').innerText = baseCars;
       document.getElementById('count-bus').innerText = baseBuses;
       document.getElementById('count-truck').innerText = baseTrucks;
       document.getElementById('count-bike').innerText = baseBikes;
       document.getElementById('count-auto').innerText = baseAutos;
-      document.getElementById('map-vehicle-count').innerText = total;
     }
 
     // Manual Quantum Solve Trigger
@@ -1403,10 +1651,10 @@
         document.getElementById('qaoa-energy').innerText = (-17.0 - Math.random() * 3.0).toFixed(3);
         btn.innerHTML = '<i class="fa-solid fa-bolt"></i> RUN QUANTUM QAOA RE-OPTIMIZE';
         
-        // Slightly re-adjust light timers
+        // Re-adjust lights using adjacent coupled formula
         const city = CITIES_DATA[currentCityKey];
         city.intersections.forEach(i => {
-          i.timer = Math.floor(15 + Math.random() * 20);
+          i.timer = calculateDynamicTimer(i);
         });
         renderSignalCards();
         drawRoadsAndSignals();
@@ -1421,8 +1669,10 @@
         if (inter.timer <= 0) {
           // Autonomous phase shift
           inter.light = (inter.light === 'NS_GREEN') ? 'EW_GREEN' : 'NS_GREEN';
-          // Autonomous green duration set by queue demand (no fixed clock!)
-          inter.timer = Math.floor(18 + Math.random() * 25);
+          
+          // Autonomous wait duration dynamically calculated using adjacent light queues
+          inter.timer = calculateDynamicTimer(inter);
+          inter.dynamicTimer = inter.timer;
         }
       });
 
@@ -1435,7 +1685,6 @@
       initMap();
       renderSignalCards();
       updateFleetCounts();
-      initVehicles();
     });
   </script>
 </body>

@@ -16,7 +16,7 @@ HOST = '0.0.0.0'
 PORT = 5000
 
 # ──────────────── Google Maps ────────────────
-GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', 'AIzaSyAhxsKRb8xexsYYd2lRt7mJebkpYnnTLhs')
 
 # ──────────────── Supported Cities ────────────────
 SUPPORTED_CITIES = ['bhopal', 'gwalior', 'newdelhi', 'bangalore', 'chandigarh']
