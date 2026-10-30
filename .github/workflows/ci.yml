@@ -31,4 +31,4 @@ jobs:
 
     - name: Test Quantum Computing Engine
       run: |
-        python -c "from backend.quantum_engine import QuantumTrafficOptimizer; q = QuantumTrafficOptimizer(); print('[CI PASS] Quantum QAOA Engine loaded successfully!')"
+        python -c "from backend.quantum_engine import QuantumEngine; q = QuantumEngine(); print('[CI PASS] QuantumEngine loaded successfully!')"
