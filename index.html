@@ -2230,26 +2230,55 @@
       initVehicles();
     }
 
-    // Calculate Dynamic Wait Timer based on Current & Adjacent Lights
-    function calculateDynamicTimer(inter) {
-      const city = CITIES_DATA[currentCityKey];
+    // Calculate Dynamic Wait Timer & Quantum Optimized Wait Time
+    function getQuantumWaitTime(inter) {
       const localQ = inter.queueNS + inter.queueEW;
-      
-      // Calculate adjacent lights total queue pressure
+      const speedPace = Math.max(0.4, (simSettings.baseSpeedPace || 1.0) * (simSettings.speedMultiplier || 1.0));
+      const countFactor = (simSettings.vehicleCount || 42) / 38.0;
+
+      // Adjacent queue pressure
+      const city = CITIES_DATA[currentCityKey];
       let adjacentQ = 0;
       if (inter.connections) {
         inter.connections.forEach(adjId => {
           const adj = city.intersections.find(i => i.id === adjId);
-          if (adj) {
-            adjacentQ += (adj.queueNS + adj.queueEW);
-          }
+          if (adj) adjacentQ += (adj.queueNS + adj.queueEW);
         });
       }
 
-      // Quantum QAOA Wave Coupling Formula:
-      // timer = base (14s) + local_weight(1.1) + adjacent_coupling(0.45)
-      const calculated = Math.round(14 + (localQ * 1.05) + (adjacentQ * 0.42));
-      return Math.min(68, Math.max(12, calculated));
+      // Quantum QAOA Wave Optimization Model:
+      // Base optimal wait is ~28% of legacy fixed wait.
+      // Scales with local & adjacent queue load, adjusted by vehicle velocity!
+      // When speed is faster, vehicles clear in fewer seconds -> wait drops!
+      const loadIndex = Math.max(0.4, ((localQ * 1.05 + adjacentQ * 0.38) / 28.0) * countFactor);
+      const loadFactor = 0.55 + (0.45 * Math.sqrt(loadIndex));
+      const velocityClearanceFactor = Math.sqrt(speedPace);
+
+      const rawWait = (inter.earlier * 0.28) * (loadFactor / velocityClearanceFactor);
+      const quantumWait = Math.round(Math.min(inter.earlier - 10, Math.max(6, rawWait)));
+      return quantumWait;
+    }
+
+    function calculateDynamicTimer(inter) {
+      const city = CITIES_DATA[currentCityKey];
+      const localQ = inter.queueNS + inter.queueEW;
+      const speedPace = Math.max(0.4, (simSettings.baseSpeedPace || 1.0) * (simSettings.speedMultiplier || 1.0));
+      const countRatio = (simSettings.vehicleCount || 42) / 38.0;
+
+      let adjacentQ = 0;
+      if (inter.connections) {
+        inter.connections.forEach(adjId => {
+          const adj = city.intersections.find(i => i.id === adjId);
+          if (adj) adjacentQ += (adj.queueNS + adj.queueEW);
+        });
+      }
+
+      // Dynamic green phase duration adjusted for queue pressure and cruising pace:
+      // Higher queue -> needs more green time to discharge.
+      // Higher speed -> clears queue faster (time needed = queue / velocity).
+      const queuePressure = (localQ * 1.1) + (adjacentQ * 0.42);
+      const calculated = Math.round((14 + queuePressure * countRatio * 0.72) / Math.sqrt(speedPace));
+      return Math.min(75, Math.max(10, calculated));
     }
 
     // Draw connecting roads and signal markers
@@ -2339,6 +2368,9 @@
         });
 
         const marker = L.marker([inter.lat, inter.lng], { icon: customIcon }).addTo(markersLayer);
+        const qWaitMap = getQuantumWaitTime(inter);
+        const qRedPctMap = Math.round(((inter.earlier - qWaitMap) / inter.earlier) * 100);
+
         marker.bindPopup(`
           <div style="background:#0d1322; color:#fff; padding:8px; border-radius:6px; font-size:12px; line-height:1.5;">
             <b style="color:var(--accent-cyan); font-size:13px;">${inter.name}</b><br>
@@ -2347,7 +2379,7 @@
             Local Queue: <b>${totalQueue} vehicles</b> (NS: ${inter.queueNS}, EW: ${inter.queueEW})<br>
             Adjacent Coupled Lights: <b>${inter.connections.length} nodes connected</b><br>
             Earlier Fixed Wait: <span style="text-decoration:line-through; color:#ff6b6b">${inter.earlier}s</span><br>
-            Quantum Wait: <b style="color:#00ff88">${Math.round(inter.earlier * 0.32)}s (-68%)</b>
+            Quantum Wait: <b style="color:#00ff88">${qWaitMap}s (-${qRedPctMap}%)</b>
           </div>
         `);
       });
@@ -2361,8 +2393,8 @@
 
       city.intersections.forEach(inter => {
         const isNSGreen = inter.light === 'NS_GREEN';
-        const quantumWait = Math.round(inter.earlier * 0.32);
-        const savingsSec = inter.earlier - quantumWait;
+        const quantumWait = getQuantumWaitTime(inter);
+        const savingsSec = Math.max(1, inter.earlier - quantumWait);
         const reductionPct = Math.round((savingsSec / inter.earlier) * 100);
         const totalQueue = inter.queueNS + inter.queueEW;
 
@@ -2444,6 +2476,48 @@
 
         container.appendChild(card);
       });
+
+      updateGlobalQuantumMetrics();
+    }
+
+    // Recalculate and update Quantum wait time savings and metrics across entire UI
+    function updateGlobalQuantumMetrics() {
+      const city = CITIES_DATA[currentCityKey];
+      if (!city || !city.intersections) return;
+
+      let totalEarlier = 0;
+      let totalQuantum = 0;
+
+      city.intersections.forEach(i => {
+        totalEarlier += i.earlier;
+        totalQuantum += getQuantumWaitTime(i);
+      });
+
+      const avgEarlier = Math.round(totalEarlier / city.intersections.length);
+      const avgQuantum = Math.round(totalQuantum / city.intersections.length);
+      const savingsPct = Math.round(((avgEarlier - avgQuantum) / avgEarlier) * 100);
+
+      // 1. Right panel circuit pill & modal values
+      const qaoaSavingsEl = document.getElementById('qaoa-savings');
+      if (qaoaSavingsEl) qaoaSavingsEl.innerText = `-${savingsPct}%`;
+
+      const legEl = document.getElementById('q-modal-legacy');
+      if (legEl) legEl.innerText = `${avgEarlier} sec`;
+      const qEl = document.getElementById('q-modal-quantum');
+      if (qEl) qEl.innerText = `${avgQuantum} sec`;
+      const savEl = document.getElementById('q-modal-savings');
+      if (savEl) savEl.innerText = `-${savingsPct}%`;
+
+      // 2. Cumulative fleet metrics scaling with fleet count and velocity
+      const vehFleet = simSettings.vehicleCount || 42;
+      const speedPace = Math.max(0.4, (simSettings.baseSpeedPace || 1.0) * (simSettings.speedMultiplier || 1.0));
+      const totalSecSaved = Math.round((avgEarlier - avgQuantum) * vehFleet * 2.4 * Math.sqrt(speedPace));
+      const co2KgSaved = ((totalSecSaved * 0.0036)).toFixed(1);
+
+      const timeSavedEl = document.getElementById('metric-time-saved');
+      if (timeSavedEl) timeSavedEl.innerText = `${totalSecSaved.toLocaleString()} sec`;
+      const co2El = document.getElementById('metric-co2');
+      if (co2El) co2El.innerText = `${co2KgSaved} kg`;
     }
 
     // Switch City Button Event
@@ -2459,6 +2533,7 @@
       drawRoadsAndSignals();
       renderSignalCards();
       initVehicles();
+      updateGlobalQuantumMetrics();
     }
 
     // Focus on an intersection
@@ -2586,6 +2661,18 @@
         el.style.animationDuration = `${Math.max(0.4, 1.4 / speed)}s`;
       });
 
+      // Recalculate timers & quantum wait times for new speed
+      const city = CITIES_DATA[currentCityKey];
+      if (city) {
+        city.intersections.forEach(i => {
+          i.timer = calculateDynamicTimer(i);
+          i.dynamicTimer = i.timer;
+        });
+      }
+      renderSignalCards();
+      drawRoadsAndSignals();
+      updateGlobalQuantumMetrics();
+
       showHudNotification(`Simulation Speed set to ${speed}x ${speed < 1 ? '(Slow-Motion Analysis)' : speed > 1 ? '(Hyper Turbo)' : '(Real-Time)'}`);
     }
 
@@ -2622,6 +2709,15 @@
           }
         }
       }
+
+      // Dynamically adjust wait timers and quantum optimization
+      inters.forEach(i => {
+        i.timer = calculateDynamicTimer(i);
+        i.dynamicTimer = i.timer;
+      });
+      renderSignalCards();
+      drawRoadsAndSignals();
+      updateGlobalQuantumMetrics();
     }
 
     function changeCruisingPace(val) {
@@ -2631,6 +2727,19 @@
       if (pacePill) pacePill.innerText = `${val.toFixed(1)}x`;
       const stressSpeed = document.getElementById('stress-speed-display');
       if (stressSpeed) stressSpeed.innerText = `${val.toFixed(1)}x (${Math.round(50 * val)} km/h)`;
+
+      // Dynamically adjust wait timers and quantum optimization
+      const city = CITIES_DATA[currentCityKey];
+      if (city) {
+        city.intersections.forEach(i => {
+          i.timer = calculateDynamicTimer(i);
+          i.dynamicTimer = i.timer;
+        });
+      }
+      renderSignalCards();
+      drawRoadsAndSignals();
+      updateGlobalQuantumMetrics();
+
       showHudNotification(`Vehicle Cruising Pace adjusted to ${val.toFixed(1)}x`);
     }
 
@@ -2669,6 +2778,8 @@
       city.intersections.forEach(i => {
         i.queueNS += Math.floor(Math.random() * 12) + 14; // Queue climbs to 25-45
         i.queueEW += Math.floor(Math.random() * 10) + 12;
+        i.timer = calculateDynamicTimer(i);
+        i.dynamicTimer = i.timer;
       });
 
       // Update stress badge
@@ -2680,6 +2791,7 @@
 
       renderSignalCards();
       drawRoadsAndSignals();
+      updateGlobalQuantumMetrics();
       playChime(320, 0.4);
 
       showHudNotification('TRAFFIC & SPEED SURGE INJECTED: 78 vehicles @ 1.8x velocity! Queues accumulating at red lights. Run Quantum QAOA to optimize wait timers!');
@@ -2734,7 +2846,7 @@
           const enEl = document.getElementById('qaoa-energy');
           if (enEl) enEl.innerText = energyVal;
 
-          // Calculate total savings
+          // Calculate total savings dynamically using getQuantumWaitTime
           const city = CITIES_DATA[currentCityKey];
           let totalEarlier = 0;
           let totalQuantum = 0;
@@ -2743,7 +2855,7 @@
             i.timer = calculateDynamicTimer(i);
             i.dynamicTimer = i.timer;
             totalEarlier += i.earlier;
-            totalQuantum += Math.round(i.earlier * 0.32);
+            totalQuantum += getQuantumWaitTime(i);
           });
 
           const avgEarlier = Math.round(totalEarlier / city.intersections.length);
@@ -2767,6 +2879,7 @@
           // Re-render
           renderSignalCards();
           drawRoadsAndSignals();
+          updateGlobalQuantumMetrics();
           showHudNotification('Quantum QAOA Optimization Solved: Timers reallocated, green wave discharging queued vehicles!');
         }, 1700);
       }
@@ -2786,6 +2899,7 @@
         // Force green phase to discharge queues
         i.light = 'NS_GREEN';
         i.timer = calculateDynamicTimer(i);
+        i.dynamicTimer = i.timer;
         // reduce queues as vehicles flow through
         i.queueNS = Math.max(2, Math.round(i.queueNS * 0.35));
         i.queueEW = Math.max(2, Math.round(i.queueEW * 0.35));
@@ -2801,6 +2915,7 @@
 
       renderSignalCards();
       drawRoadsAndSignals();
+      updateGlobalQuantumMetrics();
       playChime(880, 0.2);
       showHudNotification('Autonomous Quantum Green Timers Applied: Queues actively draining across all intersections!');
     }
@@ -2843,6 +2958,7 @@
 
         renderSignalCards();
         drawRoadsAndSignals();
+        updateGlobalQuantumMetrics();
         playChime(380, 0.3);
         showHudNotification('TRAFFIC SURGE INJECTED: +15 heavy vehicles spawned! QAOA is extending green phases to disperse queues.');
       } else if (name === 'greenwave') {
@@ -2853,6 +2969,7 @@
         });
         renderSignalCards();
         drawRoadsAndSignals();
+        updateGlobalQuantumMetrics();
         playChime(780, 0.25);
         showHudNotification('COORDINATED GREEN WAVE: Zero-stop synchronization activated across connected arterial corridors.');
       } else if (name === 'night') {
@@ -2891,6 +3008,7 @@
 
         drawRoadsAndSignals();
         renderSignalCards();
+        updateGlobalQuantumMetrics();
         showHudNotification('SIMULATION RESET: Baseline autonomous quantum traffic state restored.');
       }
     }
