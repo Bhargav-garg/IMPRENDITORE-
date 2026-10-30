@@ -1,13 +1,19 @@
 # 🚦 AUTONOMOUS SMART TRAFFIC MANAGEMENT
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Bhargav-garg/IMPRENDITORE-)
+[![Live Web Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen?logo=github)](https://bhargav-garg.github.io/IMPRENDITORE-/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0%2B-lightgrey.svg)](https://flask.palletsprojects.com/)
 [![Qiskit](https://img.shields.io/badge/Qiskit-2.0%2B-6929C4.svg)](https://qiskit.org/)
 [![Deep Learning](https://img.shields.io/badge/Deep%20Learning-YOLO%20%7C%20CNN%20%7C%20LSTM-orange.svg)]()
-[![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900.svg)](https://leafletjs.com/)
+[![SUMO](https://img.shields.io/badge/Simulation-Eclipse%20SUMO-yellow.svg)](https://eclipse.dev/sumo/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An intelligent, autonomous urban traffic control system combining **Quantum Computing (Qiskit QAOA)**, **Deep Learning (YOLO + CNN + LSTM)**, and **real-time geospatial maps (Leaflet + Google Maps Distance Matrix API)** to dynamically optimize traffic signal phases and clearance times without static clocks.
+An intelligent, autonomous urban traffic control system combining **Quantum Computing (Qiskit QAOA)**, **Deep Learning (YOLO + CNN + LSTM)**, **Eclipse SUMO microscopic simulation**, and **real-time geospatial maps (Leaflet + Google Maps Distance Matrix API)** to dynamically optimize traffic signal phases and clearance times without static clocks.
+
+> **⚡ RUN DIRECTLY ON GITHUB:**
+> - **Option 1 (Interactive In-Browser Prototype):** Open the [Live GitHub Pages Demo](https://bhargav-garg.github.io/IMPRENDITORE-/)
+> - **Option 2 (Full Backend in Cloud):** Click [Open in GitHub Codespaces](https://codespaces.new/Bhargav-garg/IMPRENDITORE-) to launch the full Python/Flask/Qiskit backend in a browser-based VM in seconds!
 
 ---
 

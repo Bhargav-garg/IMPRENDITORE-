@@ -1,0 +1,25 @@
+{
+  "name": "Autonomous Smart Traffic Management",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  },
+  "forwardPorts": [5000, 8000],
+  "portsAttributes": {
+    "5000": {
+      "label": "Autonomous Traffic Control API",
+      "onAutoForward": "openBrowser"
+    },
+    "8000": {
+      "label": "Live Interactive Dashboard",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt",
+  "postStartCommand": "python run.py"
+}
