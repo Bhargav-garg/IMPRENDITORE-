@@ -561,6 +561,13 @@
       box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
     }
 
+    .veh-marker-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
     .veh-body {
       position: relative;
       display: flex;
@@ -570,20 +577,528 @@
       transition: transform 0.08s linear;
     }
 
+    /* Forward projecting headlights */
+    .headlight-beam {
+      position: absolute;
+      top: 50%;
+      left: 85%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 16px;
+      background: linear-gradient(90deg, rgba(255, 255, 210, 0.45) 0%, rgba(255, 255, 180, 0.15) 60%, rgba(255, 255, 180, 0) 100%);
+      clip-path: polygon(0% 30%, 100% 0%, 100% 100%, 0% 70%);
+      pointer-events: none;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    /* Dual rear brake lights */
+    .brakelights {
+      position: absolute;
+      left: -2px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 12px;
+      width: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      z-index: 3;
+    }
+
+    .brakelights.active {
+      opacity: 1;
+    }
+
+    .bl-left, .bl-right {
+      width: 3.5px;
+      height: 3.5px;
+      border-radius: 50%;
+      background: #ff1133;
+      box-shadow: 0 0 8px 2px #ff0022;
+    }
+
+    /* Floating speed tag */
+    .veh-speed-tag {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8, 12, 22, 0.88);
+      border: 1px solid #1f2e4d;
+      color: #00e5ff;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      transition: all 0.15s ease;
+      z-index: 10;
+    }
+
+    .veh-speed-tag.stopped {
+      background: rgba(255, 34, 51, 0.85);
+      color: #fff;
+      border-color: #ff334b;
+    }
+
+    .veh-speed-tag.braking {
+      background: rgba(255, 183, 3, 0.85);
+      color: #000;
+      border-color: #ffb703;
+    }
+
     .siren-beacon {
       position: absolute;
       top: -4px;
       left: 50%;
       transform: translateX(-50%);
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      animation: strobeSiren 0.25s infinite alternate;
+      animation: strobeSiren 0.22s infinite alternate;
     }
 
     @keyframes strobeSiren {
-      0% { background: #ff0033; box-shadow: 0 0 14px #ff0033; }
-      100% { background: #0088ff; box-shadow: 0 0 14px #0088ff; }
+      0% { background: #ff0033; box-shadow: 0 0 16px #ff0033; }
+      100% { background: #0088ff; box-shadow: 0 0 16px #0088ff; }
+    }
+
+    /* Animated Road Flow Stream */
+    @keyframes flowDash {
+      from { stroke-dashoffset: 40; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .traffic-flow-animated {
+      animation: flowDash 1.4s linear infinite;
+    }
+
+    /* Intersection Pulsing Congestion Aura */
+    @keyframes auraPulse {
+      0% { opacity: 0.15; transform: scale(0.95); }
+      50% { opacity: 0.35; transform: scale(1.05); }
+      100% { opacity: 0.15; transform: scale(0.95); }
+    }
+
+    .intersection-pulse-aura {
+      animation: auraPulse 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Simulation Customizer Studio Dock */
+    .sim-customizer-dock {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(10, 15, 28, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid #24355a;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0, 229, 255, 0.12);
+      width: calc(100% - 28px);
+      max-width: 960px;
+      padding: 10px 16px;
+      pointer-events: auto;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sim-customizer-dock.minimized {
+      max-width: 330px;
+      padding: 6px 14px;
+    }
+
+    .sim-customizer-dock.minimized .dock-content {
+      display: none;
+    }
+
+    .dock-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .dock-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: #fff;
+    }
+
+    .dock-badge {
+      background: linear-gradient(135deg, #00e5ff 0%, #0088ff 100%);
+      color: #050914;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .dock-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dock-btn-icon {
+      background: #141f38;
+      border: 1px solid #2a3c63;
+      color: var(--text-muted);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dock-btn-icon:hover {
+      background: var(--accent-cyan);
+      color: #050914;
+    }
+
+    .dock-content {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 1px solid #1b2847;
+      padding-top: 10px;
+    }
+
+    .dock-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .dock-ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 170px;
+    }
+
+    .dock-ctrl-group label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-transform: uppercase;
+    }
+
+    .speed-btn-group {
+      display: flex;
+      gap: 4px;
+      background: #080c18;
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid #1c2a47;
+    }
+
+    .speed-pill {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .speed-pill:hover {
+      color: #fff;
+      background: rgba(0, 229, 255, 0.15);
+    }
+
+    .speed-pill.active {
+      background: var(--accent-cyan);
+      color: #050914;
+      font-weight: 800;
+    }
+
+    .dock-ctrl-group input[type="range"] {
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+      height: 6px;
+      background: #121c32;
+      border-radius: 3px;
+    }
+
+    .dock-toggles {
+      gap: 8px;
+    }
+
+    .toggle-pill {
+      background: #0c1426;
+      border: 1px solid #203154;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .toggle-pill:hover {
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    .toggle-pill.active {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+    }
+
+    .dock-scenarios {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px dashed #1c2a47;
+      padding-top: 8px;
+    }
+
+    .scenario-lbl {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--accent-amber);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .scenario-btn {
+      border: none;
+      padding: 5px 11px;
+      font-size: 10.5px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .scenario-btn.surge {
+      background: linear-gradient(135deg, #d90429 0%, #ef233c 100%);
+      color: #fff;
+      box-shadow: 0 0 8px rgba(239, 35, 60, 0.4);
+    }
+
+    .scenario-btn.greenwave {
+      background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+      color: #fff;
+    }
+
+    .scenario-btn.night {
+      background: #1b263b;
+      color: #90e0ef;
+      border: 1px solid #415a77;
+    }
+
+    .scenario-btn.reset {
+      background: #162035;
+      color: var(--text-muted);
+      border: 1px solid #253658;
+    }
+
+    .scenario-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.15);
+    }
+
+    /* Vehicle Live Telemetry Card */
+    .vehicle-telemetry-card {
+      position: absolute;
+      top: 68px;
+      left: 14px;
+      z-index: 1000;
+      background: rgba(10, 15, 28, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 10px;
+      padding: 12px;
+      width: 260px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.8), 0 0 16px rgba(0, 229, 255, 0.3);
+      pointer-events: auto;
+      animation: slideInLeft 0.25s ease-out;
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-15px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .v-hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1c2b4a;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+
+    .v-hud-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .v-hud-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .v-hud-close:hover {
+      color: #fff;
+    }
+
+    .v-hud-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .v-hud-metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10.5px;
+    }
+
+    .v-hud-metric .lbl {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .v-hud-metric .val {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .v-hud-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed #1c2b4a;
+    }
+
+    .v-hud-btn {
+      flex: 1;
+      background: #142038;
+      border: 1px solid #253961;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .v-hud-btn:hover {
+      background: var(--accent-cyan);
+      color: #050914;
+    }
+
+    .v-hud-btn.active-follow {
+      background: var(--accent-green);
+      color: #050914;
+      border-color: var(--accent-green);
+      font-weight: 800;
+    }
+
+    /* Studio Notification Banner */
+    .studio-hud-alert {
+      pointer-events: auto;
+      background: rgba(13, 23, 44, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 8px;
+      padding: 7px 14px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 11.5px;
+      box-shadow: 0 4px 18px rgba(0, 229, 255, 0.4);
+      animation: fadeInDown 0.3s ease;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Sound button */
+    .sound-toggle-btn {
+      background: #080c16;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .sound-toggle-btn:hover {
+      color: #fff;
+      border-color: var(--accent-cyan);
+    }
+
+    .sound-toggle-btn.sound-active {
+      background: rgba(0, 255, 136, 0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
     }
 
 
@@ -862,6 +1377,9 @@
       </div>
 
       <div class="emergency-actions">
+        <button class="sound-toggle-btn" id="btn-sound-toggle" onclick="toggleSound()">
+          <i class="fa-solid fa-volume-xmark"></i> SOUND: OFF
+        </button>
         <button class="btn-emergency" onclick="triggerEmergency('ambulance')">
           <i class="fa-solid fa-truck-medical"></i> AMBULANCE
         </button>
@@ -905,9 +1423,134 @@
         <div id="emergency-alert-banner" class="emergency-hud-alert">
           <i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY GREEN CORRIDOR PREEMPTION ACTIVE &bull; ALL OPPOSING SIGNALS RED
         </div>
+
+        <div id="studio-notification-banner" class="studio-hud-alert" style="display:none;"></div>
       </div>
 
+      <!-- Live Interactive Map -->
       <div id="city-map"></div>
+
+      <!-- Vehicle Live Telemetry Inspection Card -->
+      <div id="vehicle-telemetry-hud" class="vehicle-telemetry-card" style="display:none;">
+        <div class="v-hud-header">
+          <div class="v-hud-title">
+            <i id="v-hud-icon" class="fa-solid fa-car" style="color:var(--accent-cyan)"></i>
+            <span id="v-hud-name">Vehicle Telemetry</span>
+          </div>
+          <button class="v-hud-close" onclick="closeVehicleTelemetry()">&times;</button>
+        </div>
+        <div class="v-hud-body">
+          <div class="v-hud-metric">
+            <span class="lbl">VELOCITY:</span>
+            <span class="val" id="v-hud-speed" style="color:var(--accent-green)">50 km/h</span>
+          </div>
+          <div class="v-hud-metric">
+            <span class="lbl">STATUS:</span>
+            <span class="val" id="v-hud-status">CRUISING</span>
+          </div>
+          <div class="v-hud-metric">
+            <span class="lbl">ROUTE:</span>
+            <span class="val" id="v-hud-route" style="font-size:10px;">J1 &rarr; J2</span>
+          </div>
+          <div class="v-hud-metric">
+            <span class="lbl">NEXT SIGNAL:</span>
+            <span class="val" id="v-hud-next-signal">GREEN (25s)</span>
+          </div>
+          <div class="v-hud-actions">
+            <button class="v-hud-btn" id="btn-follow-toggle" onclick="toggleFollowVehicle()">
+              <i class="fa-solid fa-video"></i> Follow Vehicle
+            </button>
+            <button class="v-hud-btn" onclick="boostVehicleSpeed()">
+              <i class="fa-solid fa-gauge-high"></i> Speed Boost
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulation & Animation Customizer Studio Dock -->
+      <div class="sim-customizer-dock" id="sim-customizer-dock">
+        <div class="dock-header" onclick="toggleCustomizerDock()">
+          <div class="dock-title">
+            <i class="fa-solid fa-sliders" style="color:var(--accent-cyan)"></i>
+            <span>SIMULATION & ANIMATION STUDIO</span>
+            <span class="dock-badge">CUSTOMIZER</span>
+          </div>
+          <div class="dock-actions">
+            <button class="dock-btn-icon" id="btn-dock-toggle" title="Minimize / Expand Studio">
+              <i class="fa-solid fa-chevron-down" id="dock-chevron-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="dock-content" id="dock-content">
+          <!-- Controls: Speed, Density, Pace -->
+          <div class="dock-row">
+            <div class="dock-ctrl-group">
+              <label><i class="fa-solid fa-gauge"></i> SIM SPEED:</label>
+              <div class="speed-btn-group">
+                <button class="speed-pill" onclick="setSimSpeed(0.25)">0.25x</button>
+                <button class="speed-pill" onclick="setSimSpeed(0.5)">0.5x</button>
+                <button class="speed-pill active" id="speed-1x" onclick="setSimSpeed(1.0)">1.0x</button>
+                <button class="speed-pill" onclick="setSimSpeed(1.5)">1.5x</button>
+                <button class="speed-pill" onclick="setSimSpeed(2.0)">2.0x</button>
+                <button class="speed-pill" onclick="setSimSpeed(3.0)">3.0x</button>
+              </div>
+            </div>
+
+            <div class="dock-ctrl-group">
+              <label>
+                <i class="fa-solid fa-car-side"></i> VEHICLE FLEET:
+                <b id="lbl-veh-count" style="color:var(--accent-green); margin-left:4px;">42 Vehicles</b>
+              </label>
+              <input type="range" id="slider-veh-count" min="15" max="80" value="42" step="1" oninput="changeVehicleDensity(this.value)">
+            </div>
+
+            <div class="dock-ctrl-group">
+              <label>
+                <i class="fa-solid fa-bolt"></i> CRUISING PACE:
+                <b id="lbl-veh-pace" style="color:var(--accent-cyan); margin-left:4px;">1.0x</b>
+              </label>
+              <input type="range" id="slider-veh-pace" min="0.5" max="2.0" value="1.0" step="0.1" oninput="changeCruisingPace(this.value)">
+            </div>
+          </div>
+
+          <!-- Feature Toggles -->
+          <div class="dock-row dock-toggles">
+            <div class="toggle-pill active" id="toggle-lanes" onclick="toggleSetting('laneOffsetEnabled')">
+              <i class="fa-solid fa-road"></i> Multi-Lane Separation
+            </div>
+            <div class="toggle-pill active" id="toggle-tags" onclick="toggleSetting('speedTagsEnabled')">
+              <i class="fa-solid fa-tag"></i> Speed HUD Badges
+            </div>
+            <div class="toggle-pill active" id="toggle-lights" onclick="toggleSetting('headlightsEnabled')">
+              <i class="fa-solid fa-lightbulb"></i> Headlights & Brake LEDs
+            </div>
+            <div class="toggle-pill active" id="toggle-flow" onclick="toggleSetting('roadFlowEnabled')">
+              <i class="fa-solid fa-wave-square"></i> Animated Road Flow
+            </div>
+            <div class="toggle-pill active" id="toggle-aura" onclick="toggleSetting('congestionAuraEnabled')">
+              <i class="fa-solid fa-circle-notch"></i> Congestion Auras
+            </div>
+          </div>
+
+          <!-- Presets & Scenarios -->
+          <div class="dock-row dock-scenarios">
+            <span class="scenario-lbl"><i class="fa-solid fa-wand-magic-sparkles"></i> SCENARIOS:</span>
+            <button class="scenario-btn surge" onclick="triggerScenario('surge')">
+              <i class="fa-solid fa-fire"></i> Rush Hour Surge (+15 Cars)
+            </button>
+            <button class="scenario-btn greenwave" onclick="triggerScenario('greenwave')">
+              <i class="fa-solid fa-signal"></i> Coordinated Green Wave
+            </button>
+            <button class="scenario-btn night" onclick="triggerScenario('night')">
+              <i class="fa-solid fa-moon"></i> Midnight Cruise
+            </button>
+            <button class="scenario-btn reset" onclick="triggerScenario('reset')">
+              <i class="fa-solid fa-rotate-left"></i> Reset Distribution
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Right Column: Deep Learning & Quantum Computing -->
@@ -1144,6 +1787,10 @@
       markersLayer = L.layerGroup().addTo(map);
       vehiclesLayer = L.layerGroup().addTo(map);
 
+      map.on('click', () => {
+        closeVehicleTelemetry();
+      });
+
       drawRoadsAndSignals();
       initVehicles();
     }
@@ -1189,14 +1836,14 @@
           // 1. Asphalt highway base
           L.polyline(latlngs, {
             color: '#121829',
-            weight: 12,
+            weight: 14,
             opacity: 0.95
           }).addTo(roadsLayer);
 
           // 2. Road curb outline
           L.polyline(latlngs, {
             color: '#24324f',
-            weight: 14,
+            weight: 16,
             opacity: 0.4
           }).addTo(roadsLayer);
 
@@ -1208,11 +1855,34 @@
 
           L.polyline(latlngs, {
             color: trafficFlowColor,
-            weight: 3,
-            opacity: 0.85,
-            dashArray: '8, 12'
+            weight: 4,
+            opacity: 0.9,
+            dashArray: '10, 14',
+            className: simSettings.roadFlowEnabled ? 'traffic-flow-animated' : ''
           }).addTo(roadsLayer);
         }
+      }
+
+      // Add Pulsing Congestion / Green Wave Auras around Intersections
+      if (simSettings.congestionAuraEnabled) {
+        inters.forEach(inter => {
+          const totalQ = inter.queueNS + inter.queueEW;
+          let auraColor = '#00ff88';
+          if (emergencyMode) auraColor = '#ff0033';
+          else if (totalQ > 30) auraColor = '#ff2244';
+          else if (totalQ > 15) auraColor = '#ffb703';
+
+          const radiusM = 85 + Math.min(100, totalQ * 2.5);
+          L.circle([inter.lat, inter.lng], {
+            radius: radiusM,
+            color: auraColor,
+            weight: 1.5,
+            fillColor: auraColor,
+            fillOpacity: 0.12,
+            className: 'intersection-pulse-aura',
+            interactive: false
+          }).addTo(roadsLayer);
+        });
       }
 
       // Add Signal Beacon Markers
@@ -1365,12 +2035,353 @@
       }
     }
 
+    // -------------------------------------------------------------
+    // SIMULATION CUSTOMIZER STUDIO & AUDIO SYNTHESIZER
+    // -------------------------------------------------------------
+    let simSettings = {
+      speedMultiplier: 1.0,     // 0.25x to 3.0x
+      vehicleCount: 42,         // 15 to 80 vehicles
+      baseSpeedPace: 1.0,       // 0.5x to 2.0x
+      laneOffsetEnabled: true,  // Dual-carriageway multi-lane road physics
+      speedTagsEnabled: true,   // Floating speed tags on vehicles
+      headlightsEnabled: true,  // Headlight beams & glowing brake LEDs
+      roadFlowEnabled: true,    // Animated flowing dash currents on roads
+      congestionAuraEnabled: true, // Pulsing colored congestion auras
+      soundEnabled: false       // Synthesized Web Audio
+    };
+
+    let selectedVehicleId = null;
+    let followVehicleActive = false;
+    let audioCtx = null;
+    let notificationTimeout = null;
+
+    // Web Audio Synthesizer
+    function toggleSound() {
+      simSettings.soundEnabled = !simSettings.soundEnabled;
+      const btn = document.getElementById('btn-sound-toggle');
+      if (simSettings.soundEnabled) {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> SOUND: ON';
+        btn.classList.add('sound-active');
+        playChime(640, 0.15);
+        showHudNotification('Audio Synthesizer enabled (Web Audio API active).');
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> SOUND: OFF';
+        btn.classList.remove('sound-active');
+        showHudNotification('Audio Muted.');
+      }
+    }
+
+    function playChime(freq = 520, duration = 0.2) {
+      if (!simSettings.soundEnabled || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + duration);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function playEmergencySirenSound() {
+      if (!simSettings.soundEnabled || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        const now = audioCtx.currentTime;
+        for (let i = 0; i < 6; i++) {
+          osc.frequency.setValueAtTime(760, now + (i * 0.45));
+          osc.frequency.setValueAtTime(520, now + (i * 0.45) + 0.22);
+        }
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 2.7);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(now + 2.7);
+      } catch(e) {}
+    }
+
+    function showHudNotification(msg) {
+      const banner = document.getElementById('studio-notification-banner');
+      if (banner) {
+        banner.innerHTML = `<i class="fa-solid fa-circle-info" style="color:var(--accent-cyan); margin-right:6px;"></i> ${msg}`;
+        banner.style.display = 'block';
+        clearTimeout(notificationTimeout);
+        notificationTimeout = setTimeout(() => {
+          banner.style.display = 'none';
+        }, 4200);
+      }
+    }
+
+    // Customizer Studio Dock Controls
+    function toggleCustomizerDock() {
+      const dock = document.getElementById('sim-customizer-dock');
+      const icon = document.getElementById('dock-chevron-icon');
+      dock.classList.toggle('minimized');
+      if (dock.classList.contains('minimized')) {
+        icon.className = 'fa-solid fa-chevron-up';
+      } else {
+        icon.className = 'fa-solid fa-chevron-down';
+      }
+    }
+
+    function setSimSpeed(speed) {
+      simSettings.speedMultiplier = speed;
+      document.querySelectorAll('.speed-pill').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = Array.from(document.querySelectorAll('.speed-pill')).find(b => b.innerText === `${speed}x` || b.innerText === `${speed.toFixed(1)}x`);
+      if (activeBtn) activeBtn.classList.add('active');
+      playChime(440 + speed * 120, 0.08);
+
+      // Adjust road flow animation speed
+      const flowRoads = document.querySelectorAll('.traffic-flow-animated');
+      flowRoads.forEach(el => {
+        el.style.animationDuration = `${Math.max(0.4, 1.4 / speed)}s`;
+      });
+
+      showHudNotification(`Simulation Speed set to ${speed}x ${speed < 1 ? '(Slow-Motion Analysis)' : speed > 1 ? '(Hyper Turbo)' : '(Real-Time)'}`);
+    }
+
+    function changeVehicleDensity(val) {
+      val = parseInt(val);
+      simSettings.vehicleCount = val;
+      document.getElementById('lbl-veh-count').innerText = `${val} Vehicles`;
+      updateFleetCounts(val / 38);
+
+      const city = CITIES_DATA[currentCityKey];
+      const inters = city.intersections;
+
+      // Adjust simulatedVehicles count dynamically
+      if (val > simulatedVehicles.length) {
+        const types = ['car', 'car', 'bike', 'bike', 'truck', 'bus', 'auto'];
+        const needed = val - simulatedVehicles.length;
+        for (let k = 0; k < needed; k++) {
+          const fromIdx = Math.floor(Math.random() * inters.length);
+          let toIdx = Math.floor(Math.random() * inters.length);
+          while (toIdx === fromIdx) toIdx = Math.floor(Math.random() * inters.length);
+          const vtype = types[Math.floor(Math.random() * types.length)];
+          const newId = simulatedVehicles.length + k + 100;
+          spawnSingleVehicle(newId, vtype, inters[fromIdx], inters[toIdx]);
+        }
+      } else if (val < simulatedVehicles.length) {
+        const excess = simulatedVehicles.length - val;
+        for (let k = 0; k < excess; k++) {
+          const removed = simulatedVehicles.pop();
+          if (removed && removed.marker) {
+            vehiclesLayer.removeLayer(removed.marker);
+          }
+        }
+      }
+    }
+
+    function changeCruisingPace(val) {
+      val = parseFloat(val);
+      simSettings.baseSpeedPace = val;
+      document.getElementById('lbl-veh-pace').innerText = `${val.toFixed(1)}x`;
+      showHudNotification(`Vehicle Cruising Pace adjusted to ${val.toFixed(1)}x`);
+    }
+
+    function toggleSetting(key) {
+      simSettings[key] = !simSettings[key];
+      const elemIdMap = {
+        laneOffsetEnabled: 'toggle-lanes',
+        speedTagsEnabled: 'toggle-tags',
+        headlightsEnabled: 'toggle-lights',
+        roadFlowEnabled: 'toggle-flow',
+        congestionAuraEnabled: 'toggle-aura'
+      };
+      const pill = document.getElementById(elemIdMap[key]);
+      if (pill) {
+        pill.classList.toggle('active', simSettings[key]);
+      }
+
+      if (key === 'roadFlowEnabled' || key === 'congestionAuraEnabled') {
+        drawRoadsAndSignals();
+      }
+
+      playChime(simSettings[key] ? 600 : 380, 0.08);
+      showHudNotification(`${key.replace('Enabled', '')} is now ${simSettings[key] ? 'ENABLED' : 'DISABLED'}`);
+    }
+
+    function triggerScenario(name) {
+      const city = CITIES_DATA[currentCityKey];
+      if (name === 'surge') {
+        // Surge 15 extra cars into busiest corridor
+        const target = Math.min(80, simulatedVehicles.length + 15);
+        document.getElementById('slider-veh-count').value = target;
+        changeVehicleDensity(target);
+
+        city.intersections.forEach(i => {
+          i.queueNS += Math.floor(Math.random() * 8) + 5;
+          i.queueEW += Math.floor(Math.random() * 8) + 4;
+          i.timer = calculateDynamicTimer(i);
+        });
+
+        renderSignalCards();
+        drawRoadsAndSignals();
+        playChime(380, 0.3);
+        showHudNotification('TRAFFIC SURGE INJECTED: +15 heavy vehicles spawned! QAOA is extending green phases to disperse queues.');
+      } else if (name === 'greenwave') {
+        // Coordinated Green Wave
+        city.intersections.forEach(i => {
+          i.light = 'NS_GREEN';
+          i.timer = 45;
+        });
+        renderSignalCards();
+        drawRoadsAndSignals();
+        playChime(780, 0.25);
+        showHudNotification('COORDINATED GREEN WAVE: Zero-stop synchronization activated across connected arterial corridors.');
+      } else if (name === 'night') {
+        // Midnight Cruise
+        document.getElementById('time-slot-select').value = '00-03';
+        changeTimeSlot('00-03');
+        document.getElementById('slider-veh-count').value = 22;
+        changeVehicleDensity(22);
+        setSimSpeed(0.85);
+        simSettings.headlightsEnabled = true;
+        document.getElementById('toggle-lights').classList.add('active');
+        showHudNotification('MIDNIGHT CRUISE: Low traffic, headlights illuminated, peaceful autonomous flow.');
+      } else if (name === 'reset') {
+        document.getElementById('slider-veh-count').value = 42;
+        changeVehicleDensity(42);
+        setSimSpeed(1.0);
+        simSettings.baseSpeedPace = 1.0;
+        document.getElementById('slider-veh-pace').value = 1.0;
+        document.getElementById('lbl-veh-pace').innerText = '1.0x';
+        simSettings.laneOffsetEnabled = true;
+        simSettings.speedTagsEnabled = true;
+        simSettings.headlightsEnabled = true;
+        simSettings.roadFlowEnabled = true;
+        simSettings.congestionAuraEnabled = true;
+
+        ['toggle-lanes', 'toggle-tags', 'toggle-lights', 'toggle-flow', 'toggle-aura'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add('active');
+        });
+
+        city.intersections.forEach(i => {
+          i.queueNS = Math.floor(Math.random() * 10) + 6;
+          i.queueEW = Math.floor(Math.random() * 10) + 5;
+          i.timer = calculateDynamicTimer(i);
+        });
+
+        drawRoadsAndSignals();
+        renderSignalCards();
+        showHudNotification('SIMULATION RESET: Baseline autonomous quantum traffic state restored.');
+      }
+    }
+
+    // Interactive Vehicle Telemetry Inspection & Follow
+    function selectVehicle(id, e) {
+      if (e) L.DomEvent.stopPropagation(e);
+      selectedVehicleId = id;
+      const v = simulatedVehicles.find(veh => veh.id === id);
+      if (!v) return;
+
+      const hud = document.getElementById('vehicle-telemetry-hud');
+      if (hud) {
+        hud.style.display = 'block';
+        updateVehicleTelemetryHUD(v);
+      }
+      playChime(550, 0.1);
+    }
+
+    function closeVehicleTelemetry() {
+      selectedVehicleId = null;
+      followVehicleActive = false;
+      const btn = document.getElementById('btn-follow-toggle');
+      if (btn) btn.classList.remove('active-follow');
+      const hud = document.getElementById('vehicle-telemetry-hud');
+      if (hud) hud.style.display = 'none';
+    }
+
+    function toggleFollowVehicle() {
+      followVehicleActive = !followVehicleActive;
+      const btn = document.getElementById('btn-follow-toggle');
+      if (btn) {
+        if (followVehicleActive) {
+          btn.classList.add('active-follow');
+          btn.innerHTML = '<i class="fa-solid fa-video"></i> Following...';
+          showHudNotification(`Camera tracking Vehicle #${selectedVehicleId + 1}`);
+        } else {
+          btn.classList.remove('active-follow');
+          btn.innerHTML = '<i class="fa-solid fa-video"></i> Follow Vehicle';
+        }
+      }
+    }
+
+    function boostVehicleSpeed() {
+      if (selectedVehicleId !== null) {
+        const v = simulatedVehicles.find(veh => veh.id === selectedVehicleId);
+        if (v) {
+          v.baseSpeed *= 1.35;
+          v.currentSpeed = v.baseSpeed;
+          playChime(820, 0.12);
+          showHudNotification(`Vehicle #${v.id + 1} boosted to ${Math.round(v.maxSpeedKmh * 1.35)} km/h!`);
+        }
+      }
+    }
+
+    function updateVehicleTelemetryHUD(v) {
+      const cfg = VEHICLE_CONFIGS[v.type] || VEHICLE_CONFIGS.car;
+      const iconEl = document.getElementById('v-hud-icon');
+      if (iconEl) {
+        iconEl.className = `fa-solid ${cfg.icon}`;
+        iconEl.style.color = cfg.color;
+      }
+      const nameEl = document.getElementById('v-hud-name');
+      if (nameEl) nameEl.innerText = `${cfg.label} #${v.id + 1}`;
+
+      const speedEl = document.getElementById('v-hud-speed');
+      if (speedEl) {
+        speedEl.innerText = `${v.speedKmh} km/h`;
+        speedEl.style.color = v.isStopped ? '#ff334b' : (v.speedKmh > 40 ? '#00ff88' : '#ffb703');
+      }
+
+      const statusEl = document.getElementById('v-hud-status');
+      if (statusEl) {
+        if (v.isStopped) {
+          statusEl.innerHTML = `<span style="color:#ff334b; font-weight:800;">STOPPED (RED LIGHT)</span>`;
+        } else if (v.isBraking) {
+          statusEl.innerHTML = `<span style="color:#ffb703; font-weight:800;">DECELERATING</span>`;
+        } else {
+          statusEl.innerHTML = `<span style="color:#00ff88; font-weight:800;">CRUISING (GREEN)</span>`;
+        }
+      }
+
+      const routeEl = document.getElementById('v-hud-route');
+      if (routeEl) routeEl.innerText = `${v.from.name.split(' ')[0]} -> ${v.to.name.split(' ')[0]}`;
+
+      const sigEl = document.getElementById('v-hud-next-signal');
+      if (sigEl) {
+        const toInter = v.to;
+        const isNS = Math.abs(toInter.lat - v.from.lat) > Math.abs(toInter.lng - v.from.lng);
+        const signalGreen = emergencyMode ? (v.isEmergency) : (isNS ? (toInter.light === 'NS_GREEN') : (toInter.light === 'EW_GREEN'));
+        sigEl.innerHTML = `<b style="color:${signalGreen ? '#00ff88' : '#ff334b'}">${signalGreen ? 'GREEN' : 'RED'}</b> (${toInter.timer}s)`;
+      }
+    }
+
     // Emergency Preemption Trigger (Ambulance or Firetruck)
     function triggerEmergency(type) {
       emergencyMode = true;
       emergencyType = type;
       document.getElementById('emergency-alert-banner').style.display = 'block';
       document.getElementById('count-emergency').innerText = '1';
+
+      // Play authentic synthesized two-tone emergency siren
+      playEmergencySirenSound();
 
       // Draw pulsing emergency green corridor polyline across city
       const city = CITIES_DATA[currentCityKey];
@@ -1380,8 +2391,8 @@
 
       emergencyPolyline = L.polyline(routePoints, {
         color: '#ff0033',
-        weight: 6,
-        opacity: 0.9,
+        weight: 7,
+        opacity: 0.95,
         dashArray: '10, 10'
       }).addTo(map);
 
@@ -1390,6 +2401,7 @@
 
       renderSignalCards();
       drawRoadsAndSignals();
+      showHudNotification(`EMERGENCY: ${type.toUpperCase()} DISPATCHED! Quantum corridor preemption active.`);
 
       // Auto-clear emergency after 14 seconds
       setTimeout(() => {
@@ -1399,6 +2411,7 @@
         if (emergencyPolyline) map.removeLayer(emergencyPolyline);
         renderSignalCards();
         drawRoadsAndSignals();
+        showHudNotification('Emergency cleared. Autonomous quantum schedule resumed.');
       }, 14000);
     }
 
@@ -1410,12 +2423,16 @@
       const vIcon = L.divIcon({
         className: 'moving-veh-marker',
         html: `
-          <div class="veh-body" style="color:${cfg.color}; font-size:24px; filter:drop-shadow(0 0 10px #ff0000);">
-            <i class="fa-solid ${cfg.icon}"></i>
-            <div class="siren-beacon"></div>
+          <div class="veh-marker-wrap" onclick="selectVehicle('emergency_active', event)">
+            <div class="veh-speed-tag stopped" style="background:#ff0033; color:#fff;">EMERGENCY 85 km/h</div>
+            <div class="veh-body" style="color:${cfg.color}; font-size:26px; filter:drop-shadow(0 0 14px #ff0000);">
+              <div class="headlight-beam" style="width:40px; height:22px; background:linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(0,200,255,0.3) 100%);"></div>
+              <i class="fa-solid ${cfg.icon}"></i>
+              <div class="siren-beacon"></div>
+            </div>
           </div>
         `,
-        iconSize: [28, 28]
+        iconSize: [32, 32]
       });
 
       const start = inters[0];
@@ -1428,11 +2445,13 @@
         from: start,
         to: end,
         progress: 0.0,
-        baseSpeed: 0.018,
-        currentSpeed: 0.018,
+        baseSpeed: 0.020,
+        currentSpeed: 0.020,
         maxSpeedKmh: 85,
         speedKmh: 85,
         isStopped: false,
+        isBraking: false,
+        laneIndex: 0,
         marker: marker,
         isEmergency: true
       });
@@ -1459,7 +2478,7 @@
     }
 
     // -------------------------------------------------------------
-    // REAL-TIME VEHICLES & QUEUE PHYSICS (Cars, Bikes, Trucks, Buses)
+    // REAL-TIME VEHICLES & QUEUE PHYSICS (Multi-Lane, Accel/Decel)
     // -------------------------------------------------------------
     let simulatedVehicles = [];
     const VEHICLE_CONFIGS = {
@@ -1472,6 +2491,55 @@
       firetruck: { icon: 'fa-fire-extinguisher', color: '#ff5500', speed: 0.014, maxKmh: 80, size: 24, label: 'Fire Truck' }
     };
 
+    function spawnSingleVehicle(id, vtype, from, to) {
+      const cfg = VEHICLE_CONFIGS[vtype] || VEHICLE_CONFIGS.car;
+      const progress = Math.random();
+      const laneIndex = (vtype === 'truck' || vtype === 'bus') ? 1 : Math.floor(Math.random() * 2);
+
+      const vIcon = L.divIcon({
+        className: 'moving-veh-marker',
+        html: `
+          <div class="veh-marker-wrap" onclick="selectVehicle(${id}, event)">
+            <div class="veh-speed-tag">${cfg.maxKmh} km/h</div>
+            <div class="veh-body" style="color:${cfg.color}; font-size:${cfg.size}px;">
+              <div class="headlight-beam"></div>
+              <i class="fa-solid ${cfg.icon}"></i>
+              <div class="brakelights">
+                <span class="bl-left"></span>
+                <span class="bl-right"></span>
+              </div>
+            </div>
+          </div>
+        `,
+        iconSize: [cfg.size + 4, cfg.size + 4]
+      });
+
+      const lat = from.lat + (to.lat - from.lat) * progress;
+      const lng = from.lng + (to.lng - from.lng) * progress;
+      const marker = L.marker([lat, lng], { icon: vIcon }).addTo(vehiclesLayer);
+
+      const vehObj = {
+        id: id,
+        type: vtype,
+        from: from,
+        to: to,
+        progress: progress,
+        baseSpeed: cfg.speed * (0.85 + Math.random() * 0.3),
+        currentSpeed: cfg.speed,
+        maxSpeedKmh: cfg.maxKmh,
+        speedKmh: cfg.maxKmh,
+        isStopped: false,
+        isBraking: false,
+        laneIndex: laneIndex,
+        queueIndex: Math.floor(Math.random() * 3),
+        marker: marker,
+        isEmergency: false
+      };
+
+      simulatedVehicles.push(vehObj);
+      return vehObj;
+    }
+
     function initVehicles() {
       if (!vehiclesLayer) return;
       vehiclesLayer.clearLayers();
@@ -1479,7 +2547,7 @@
 
       const city = CITIES_DATA[currentCityKey];
       const inters = city.intersections;
-      const count = 38; // 38 active vehicles moving on tracks
+      const count = simSettings.vehicleCount || 42;
 
       const types = ['car', 'car', 'car', 'bike', 'bike', 'truck', 'bus', 'auto'];
 
@@ -1489,51 +2557,18 @@
         while (toIdx === fromIdx) {
           toIdx = Math.floor(Math.random() * inters.length);
         }
-
         const vtype = types[Math.floor(Math.random() * types.length)];
-        const cfg = VEHICLE_CONFIGS[vtype];
-        const progress = Math.random();
-
-        const vIcon = L.divIcon({
-          className: 'moving-veh-marker',
-          html: `
-            <div class="veh-body" style="color:${cfg.color}; font-size:${cfg.size}px;">
-              <i class="fa-solid ${cfg.icon}"></i>
-            </div>
-          `,
-          iconSize: [cfg.size + 4, cfg.size + 4]
-        });
-
-        const from = inters[fromIdx];
-        const to = inters[toIdx];
-        const lat = from.lat + (to.lat - from.lat) * progress;
-        const lng = from.lng + (to.lng - from.lng) * progress;
-
-        const marker = L.marker([lat, lng], { icon: vIcon }).addTo(vehiclesLayer);
-
-        simulatedVehicles.push({
-          id: i,
-          type: vtype,
-          from: from,
-          to: to,
-          progress: progress,
-          baseSpeed: cfg.speed * (0.85 + Math.random() * 0.3),
-          currentSpeed: cfg.speed,
-          maxSpeedKmh: cfg.maxKmh,
-          speedKmh: cfg.maxKmh,
-          isStopped: false,
-          queueIndex: Math.floor(Math.random() * 3),
-          marker: marker,
-          isEmergency: false
-        });
+        spawnSingleVehicle(i, vtype, inters[fromIdx], inters[toIdx]);
       }
     }
 
     // High performance 60FPS vehicle movement & stopping engine
     let lastAnimTime = performance.now();
     function animateVehicles(time) {
-      const dt = Math.min(0.1, (time - lastAnimTime) / 1000.0);
+      const rawDt = Math.min(0.1, (time - lastAnimTime) / 1000.0);
       lastAnimTime = time;
+
+      const effectiveDt = rawDt * simSettings.speedMultiplier * simSettings.baseSpeedPace;
 
       const city = CITIES_DATA[currentCityKey];
       const inters = city.intersections;
@@ -1552,15 +2587,16 @@
         const signalGreen = emergencyMode ? (v.isEmergency) : (isNS ? (toInter.light === 'NS_GREEN') : (toInter.light === 'EW_GREEN'));
 
         // Stop line position staggered by queue index (creates realistic vehicle queue line behind red light!)
-        const stopProgress = 0.84 - (v.queueIndex * 0.038);
+        const stopProgress = 0.83 - (v.queueIndex * 0.042);
 
-        if (!signalGreen && !v.isEmergency && v.progress >= (stopProgress - 0.06) && v.progress < 0.98) {
-          // VEHICLE STOPS AT RED LIGHT: Decelerate smoothly to 0 km/h!
-          v.currentSpeed = Math.max(0, v.currentSpeed - v.baseSpeed * 4.5 * dt);
+        if (!signalGreen && !v.isEmergency && v.progress >= (stopProgress - 0.08) && v.progress < 0.98) {
+          // VEHICLE STOPS AT RED LIGHT: Decelerate smoothly to 0 km/h with brake lights ON!
+          v.currentSpeed = Math.max(0, v.currentSpeed - v.baseSpeed * 4.8 * effectiveDt);
           if (v.progress > stopProgress) {
             v.progress = stopProgress;
           }
           v.isStopped = (v.currentSpeed <= 0.0002);
+          v.isBraking = true;
           if (v.isStopped) {
             v.currentSpeed = 0;
             v.speedKmh = 0;
@@ -1569,12 +2605,15 @@
             // Increment queue at destination light
             if (isNS) queueCounters[toInter.id].NS += 1;
             else queueCounters[toInter.id].EW += 1;
+          } else {
+            v.speedKmh = Math.round((v.currentSpeed / v.baseSpeed) * v.maxSpeedKmh);
           }
         } else {
           // VEHICLE ACCELERATES ON GREEN: Accelerate up to speed limit!
+          v.isBraking = false;
           v.isStopped = false;
-          v.currentSpeed = Math.min(v.baseSpeed, v.currentSpeed + v.baseSpeed * 3.5 * dt);
-          v.progress += v.currentSpeed * (dt * 6.0);
+          v.currentSpeed = Math.min(v.baseSpeed, v.currentSpeed + v.baseSpeed * 3.8 * effectiveDt);
+          v.progress += v.currentSpeed * (effectiveDt * 6.0);
           v.speedKmh = Math.round((v.currentSpeed / v.baseSpeed) * v.maxSpeedKmh);
           movingCount++;
         }
@@ -1593,23 +2632,84 @@
           v.queueIndex = Math.floor(Math.random() * 3);
         }
 
-        // Interpolate position
-        const lat = v.from.lat + (v.to.lat - v.from.lat) * v.progress;
-        const lng = v.from.lng + (v.to.lng - v.from.lng) * v.progress;
-        v.marker.setLatLng([lat, lng]);
+        // Interpolate base position
+        const baseLat = v.from.lat + (v.to.lat - v.from.lat) * v.progress;
+        const baseLng = v.from.lng + (v.to.lng - v.from.lng) * v.progress;
 
         // Directional Heading Angle (Degrees)
         const dLat = v.to.lat - v.from.lat;
         const dLng = v.to.lng - v.from.lng;
+        const dist = Math.hypot(dLat, dLng) || 0.0001;
         const angle = (Math.atan2(dLng, dLat) * 180 / Math.PI) - 90;
 
+        // Multi-Lane Lateral Offset Calculation:
+        // Normal vector perpendicular to trajectory: (-dLng, dLat)
+        let finalLat = baseLat;
+        let finalLng = baseLng;
+
+        if (simSettings.laneOffsetEnabled) {
+          const normLat = -dLng / dist;
+          const normLng = dLat / dist;
+          const baseLaneDist = 0.00030;
+          const laneSide = (v.laneIndex === 0) ? 0.8 : 1.35;
+          const totalOffset = baseLaneDist * laneSide;
+
+          finalLat += normLat * totalOffset;
+          finalLng += normLng * totalOffset;
+        }
+
+        v.marker.setLatLng([finalLat, finalLng]);
+
+        // Camera follow active vehicle
+        if (followVehicleActive && selectedVehicleId === v.id && map) {
+          map.panTo([finalLat, finalLng], { animate: false });
+        }
+
+        // DOM styling updates for vehicle
         const el = v.marker.getElement();
         if (el) {
           const body = el.querySelector('.veh-body');
           if (body) {
             body.style.transform = `rotate(${angle}deg)`;
-            body.style.opacity = v.isStopped ? '0.7' : '1.0';
+            body.style.opacity = v.isStopped ? '0.78' : '1.0';
           }
+
+          // Brake lights activation
+          const brakelights = el.querySelector('.brakelights');
+          if (brakelights) {
+            if (v.isBraking || v.isStopped) {
+              brakelights.classList.add('active');
+            } else {
+              brakelights.classList.remove('active');
+            }
+          }
+
+          // Headlights visibility
+          const headlight = el.querySelector('.headlight-beam');
+          if (headlight) {
+            headlight.style.display = simSettings.headlightsEnabled ? 'block' : 'none';
+          }
+
+          // Speed tag visibility and contents
+          const speedTag = el.querySelector('.veh-speed-tag');
+          if (speedTag) {
+            speedTag.style.display = simSettings.speedTagsEnabled ? 'block' : 'none';
+            if (v.isStopped) {
+              speedTag.className = 'veh-speed-tag stopped';
+              speedTag.innerText = '0 [RED]';
+            } else if (v.isBraking) {
+              speedTag.className = 'veh-speed-tag braking';
+              speedTag.innerText = `${v.speedKmh} km/h`;
+            } else {
+              speedTag.className = 'veh-speed-tag';
+              speedTag.innerText = `${v.speedKmh} km/h`;
+            }
+          }
+        }
+
+        // Update live telemetry if currently inspected
+        if (selectedVehicleId === v.id) {
+          updateVehicleTelemetryHUD(v);
         }
       });
 
@@ -1643,6 +2743,7 @@
     function runManualQuantumSolve() {
       const btn = document.querySelector('.btn-solve-qaoa');
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> OPTIMIZING QAOA HAMILTONIAN...';
+      playChime(520, 0.4);
 
       setTimeout(() => {
         const bitstrings = ['|01010&rang;', '|10101&rang;', '|00110&rang;', '|11001&rang;'];
@@ -1658,6 +2759,8 @@
         });
         renderSignalCards();
         drawRoadsAndSignals();
+        playChime(880, 0.25);
+        showHudNotification('Quantum QAOA Optimization Solved: Dynamic timers updated across all coupled junctions.');
       }, 700);
     }
 
